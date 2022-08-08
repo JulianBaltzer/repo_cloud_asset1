@@ -1,3 +1,4 @@
+from cgi import test
 import csv
 from multiprocessing import connection
 import queue
@@ -10,7 +11,7 @@ import glob
 import datetime
 import mysql.connector
 import sys
-
+test = 1
 
 
 # Quellverzeichnis
