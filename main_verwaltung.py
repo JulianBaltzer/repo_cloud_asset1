@@ -8,7 +8,7 @@ db = mysql.connector.connect(
     passwd = "",
     database = ""
 )
-
+test = 1
 cursor = db.cursor()
 cursor2 = db.cursor()
 
