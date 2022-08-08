@@ -1,4 +1,3 @@
-import pandas as pd
 import mysql.connector
 
 db = mysql.connector.connect(
@@ -7,10 +6,16 @@ db = mysql.connector.connect(
     passwd = "",
     database = ""
 )
-test = 1
+db2 = mysql.connector.connect(
+    host = "",
+    user = "",
+    passwd = "",
+    database = ""
+)
+
 cursor = db.cursor()
 cursor2 = db.cursor()
-test = 2
+
 def check_servicetype(servicetype):
     cursor.execute("Select * from servicetypes where st_type  = {servicetype}".format(servicetype))
     row = cursor.fetchall()
