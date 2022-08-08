@@ -17,6 +17,7 @@ import sys
 source = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/quellverzeichnis/"
 # Arbeitsverzeichnis
 destination = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis/"
+#Errorverzeichnis
 
 #Datei in Quellverzeichnis vorhanden?
 
@@ -57,12 +58,13 @@ for filename in filenames:
             sys.exit(1)
         
         for x in rows:
-            dataframe["queue_status"] = 0
+            dataframe["q_status"] = 0
             now = datetime.datetime.now()
             dataframe["dbindate"] = now.strftime("%d/%m/%Y %H:%M:%S")
             dataframe["dbinuser"] = ""
             dataframe["dbupdateuser"] = ""
             dataframe["queue_status"] = ""
+            dataframe["q_message"] = ""
             dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")   
             
             tags_df = dataframe.filter(regex=r'^tag')
@@ -70,10 +72,13 @@ for filename in filenames:
             
             # Alle nicht benötigten Spalten rausschmeißen
             
-        #dataframe.drop(['lineItem/isCorrection'], axis='columns')
+            dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
+                           'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
+                           'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
             
     except:
         print("Error in" + filename)
+        path.close()
         
 dataframe
 
