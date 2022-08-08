@@ -1,7 +1,6 @@
 import pandas as pd
 import mysql.connector
 
-
 db = mysql.connector.connect(
     host = "",
     user = "",
