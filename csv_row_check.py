@@ -12,6 +12,11 @@ import datetime
 import mysql.connector
 import sys
 
+test = 2
+Test = 3 
+
+rechnung= 3+3
+print("Hallo")a
 
 # Quellverzeichnis
 source = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/quellverzeichnis/"
