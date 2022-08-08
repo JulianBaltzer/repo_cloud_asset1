@@ -86,3 +86,5 @@ for x in list_of_queue:
     
     cursor.execute("Insert into costs (c_mycost, c_unitprice, c_billedquantity, startzeit, endzeit, compartment_name, c_rid) VALUES ({mycost},{unit_price},{billedquantity},{startzeit},{endzeit},{compartment},{res_id})".format(
                    mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id))
+    
+    test = 1+2
