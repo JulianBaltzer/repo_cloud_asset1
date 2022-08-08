@@ -43,7 +43,7 @@ else:
 
 
 # Dataframe erstellen
-path  = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis"
+path  = "C:/Users/Julian.Baltzer/OneDrive - FUNKE Mediengruppe/Desktop/Python/App/Input"
 filenames  = glob.glob(path + "/*.csv")
 
 
@@ -51,27 +51,27 @@ filenames  = glob.glob(path + "/*.csv")
 for filename in filenames:
     try:
         dataframe = pd.read_csv(filename, sep=',',low_memory=False)
+        dataframe["queue_status"] = 0
+        now = datetime.datetime.now()
+        dataframe["dbindate"] = now.strftime("%d/%m/%Y %H:%M:%S")
+        dataframe["dbinuser"] = ""
+        dataframe["dbupdateuser"] = ""
+        dataframe["queue_status"] = ""
+        dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")   
         rows = dataframe.values.tolist()
+        tags_df = dataframe.filter(regex=r'^tag')
+        dataframe.drop(['lineItem/isCorrection'], axis='columns')
+        #tags_df.to_sql()#Für tags in Sql Transformation
         if dataframe.empty:
             print("Keine Datensätz zu verarbeiten")
             sys.exit(1)
         
         for x in rows:
-            dataframe["queue_status"] = 0
-            now = datetime.datetime.now()
-            dataframe["dbindate"] = now.strftime("%d/%m/%Y %H:%M:%S")
-            dataframe["dbinuser"] = ""
-            dataframe["dbupdateuser"] = ""
-            dataframe["queue_status"] = ""
-            dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")   
+            cursor.execute("Insert into queue (currency) VALUES {currency}".format(rows["Nur beispiel"]))
             
-            tags_df = dataframe.filter(regex=r'^tag')
-            #tags_df.to_sql()#Für tags in Sql Transformation
-            
-            # Alle nicht benötigten Spalten rausschmeißen
-            
-        #dataframe.drop(['lineItem/isCorrection'], axis='columns')
-            
+            # Alle nicht benötigten Spalten rausschmeißen 
+            # Datenbank verbindung herstellen
+            # cursor.execute fertig machen  
     except:
         print("Error in" + filename)
         
