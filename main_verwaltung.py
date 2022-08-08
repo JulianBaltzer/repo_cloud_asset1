@@ -11,7 +11,7 @@ db = mysql.connector.connect(
 test = 1
 cursor = db.cursor()
 cursor2 = db.cursor()
-
+test = 2
 def check_servicetype(servicetype):
     cursor.execute("Select * from servicetypes where st_type  = {servicetype}".format(servicetype))
     row = cursor.fetchall()
