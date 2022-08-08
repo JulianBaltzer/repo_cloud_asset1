@@ -43,7 +43,7 @@ else:
 
 
 # Dataframe erstellen
-path  = "C:/Users/Julian.Baltzer/OneDrive - FUNKE Mediengruppe/Desktop/Python/App/input"
+path  = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis"
 filenames  = glob.glob(path + "/*.csv")
 
 
@@ -66,13 +66,16 @@ for filename in filenames:
             dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")   
             
             tags_df = dataframe.filter(regex=r'^tag')
-            tags_df.to_sql()
+            #tags_df.to_sql()#Für tags in Sql Transformation
             
             # Alle nicht benötigten Spalten rausschmeißen
             
+        #dataframe.drop(['lineItem/isCorrection'], axis='columns')
             
     except:
         print("Error in" + filename)
+        
+dataframe
 
 
 dataframe
