@@ -88,3 +88,4 @@ for x in list_of_queue:
                    mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id))
     
     test = 1+2
+    hallo = "dfgidjfgjidfjigji"
