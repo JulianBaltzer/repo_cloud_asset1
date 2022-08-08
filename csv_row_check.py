@@ -43,38 +43,39 @@ else:
 
 
 # Dataframe erstellen
-path  = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis"
+path  = "C:/Users/Julian.Baltzer/OneDrive - FUNKE Mediengruppe/Desktop/Python/App/input"
 filenames  = glob.glob(path + "/*.csv")
+
 
 
 for filename in filenames:
     try:
-        dataframe = pd.read_csv(filenames, sep=';', skiprows=1, low_memory=False)
-        print(dataframe)
-        
+        dataframe = pd.read_csv(filename, sep=',',low_memory=False)
+        rows = dataframe.values.tolist()
         if dataframe.empty:
             print("Keine Datensätz zu verarbeiten")
             sys.exit(1)
-    
-
-        # Fügt spalten hinzu
-
-        dataframe["queue_status"] = 0
-        now = datetime.now()
-        dataframe["dbindate"] = now.strftime("%d/%m/%Y %H:%M:%S")
-        dataframe["dbinuser"] = ""
-        dataframe["dbupdateuser"] = ""
-        dataframe["queue_status"] = ""
-        dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")
         
-        #Tags
-
-        tags_df = dataframe.filter(regex=r'^tag')
-
+        for x in rows:
+            dataframe["queue_status"] = 0
+            now = datetime.datetime.now()
+            dataframe["dbindate"] = now.strftime("%d/%m/%Y %H:%M:%S")
+            dataframe["dbinuser"] = ""
+            dataframe["dbupdateuser"] = ""
+            dataframe["queue_status"] = ""
+            dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")   
+            
+            tags_df = dataframe.filter(regex=r'^tag')
+            tags_df.to_sql()
+            
+            # Alle nicht benötigten Spalten rausschmeißen
+            
+            
     except:
         print("Error in" + filename)
-    
 
+
+dataframe
 # Verbindung Datenbank
 
 queue = mysql.connector.connect(
