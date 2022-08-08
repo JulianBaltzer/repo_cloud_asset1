@@ -9,6 +9,7 @@ import pandas as pd
 import glob
 import datetime
 import mysql.connector
+import sys
 
 
 
@@ -30,22 +31,31 @@ for f in allfiles:
     
 
 # Inhalt in Csv-Datei?
-"""df = pd.read_csv("C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis/namen.csv")
+""""path  = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis"
+csv_files = glob.glob(path + "/*.csv")
+df = pd.read_csv.glob.glob(path + "/*.csv")
 if df.empty:
     print("Kein Inhalt")
 else:
     print(df)"""
-    
+
+
+
 
 # Dataframe erstellen
 path  = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis"
 filenames  = glob.glob(path + "/*.csv")
-df = []
+
 
 for filename in filenames:
     try:
-        dataframe = pd.read_csv(filename, sep=';', skiprows=1, low_memory=False)
+        dataframe = pd.read_csv(filenames, sep=';', skiprows=1, low_memory=False)
         print(dataframe)
+        
+        if dataframe.empty:
+            print("Keine Datensätz zu verarbeiten")
+            sys.exit(1)
+    
 
         # Fügt spalten hinzu
 
