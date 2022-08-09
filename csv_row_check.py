@@ -93,12 +93,15 @@ for filename in filenames:
                                                                                                                                                         rows[x][11],
                                                                                                                                                         rows[x][12]))
             
-            
+        
     except:
         print("Error in" + filename)
-        
-    
 
+    
+# Tags tablle insert 
+# Errorverzeichnis verschieben an richtiger stelle
+# Okay verzeichnis verschieben an richtiger stelle
+# praxitest
 
 
 
