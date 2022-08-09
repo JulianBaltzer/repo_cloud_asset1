@@ -1,8 +1,7 @@
 from cgi import test
 import csv
+from hashlib import new
 from multiprocessing import connection
-import queue
-import sqlite3
 import shutil
 import os
 import csv
@@ -27,6 +26,7 @@ source = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud A
 # Arbeitsverzeichnis
 destination = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis/"
 #Errorverzeichnis
+errorverzeichnis = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/errorverzeichnis/"
 
 #Datei in Quellverzeichnis vorhanden?
 
@@ -96,10 +96,17 @@ for filename in filenames:
         
     except:
         print("Error in" + filename)
+        # Errorverzeichnis verschieben 
+        filename  = "reports_cost-csv_0001000000644485.csv"
+        now = datetime.datetime.now()
+        new_name = now.strftime("%d_%m_%Y %H_%M_%S") + filename
+        os.rename(destination+filename, destination+ new_name)
+        shutil.move(destination+ new_name, errorverzeichnis+ new_name)
 
     
-# Tags tablle insert 
-# Errorverzeichnis verschieben an richtiger stelle
+# Tags tabelle insert 
+
+
 # Okay verzeichnis verschieben an richtiger stelle
 # praxitest
 
