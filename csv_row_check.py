@@ -1,6 +1,4 @@
-from cgi import test
-from hashlib import new
-from multiprocessing import connection
+from ast import Pass
 import shutil
 import os
 import pandas as pd
@@ -8,90 +6,93 @@ import glob
 import datetime
 import mysql.connector
 import sys
+import ntpath
+import time
+from sqlalchemy import true
 
 db = mysql.connector.connect(
     host='localhost',
     database='queue',
     user='root',
     password='Gu6dQVQbMXFsPQQ7!',
-    port=22
+    port=3306
 )
 
+
 cursor  = db.cursor()
+check = 0
 
 # Quellverzeichnis
-source = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/quellverzeichnis/"
+source = "/home/opc/Project/Source/"
 # Arbeitsverzeichnis
-destination = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/arbeitsverzeichnis/"
+destination = "/home/opc/Project/arbeitsverzeichnis/"
 #Errorverzeichnis
-errorverzeichnis = "C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/errorverzeichnis/"
+errorverzeichnis = "/home/opc/Project/error/"
 
-done = "Pfad hier einfügen"
+done = "/home/opc/Project/Output/"
 #Datei in Quellverzeichnis vorhanden?
-
-if len(os.listdir('C:/Users/Michael.Malkmus/OneDrive - FUNKE Mediengruppe/Desktop/Cloud Assets Projekt/csv_import/quellverzeichnis') ) == 0:
-    print("Keine Datei vorhanden")
-else:    
-    allfiles = os.listdir(source)
-
-# Datein in Arbeitsverzeichnis verschieben
-for f in allfiles:
-    shutil.move(source+ f, destination + f)
-    
-# Dataframe erstellen
-path  = "C:/Users/jbalt/Documents"
-filenames  = glob.glob(path + "\*.csv")
-
-for filename in filenames:
-    try:
-        dataframe = pd.read_csv(filename, sep=',',low_memory=False)
-        dataframe["q_status"] = 0
-        now = datetime.datetime.now()
-        dataframe["dbindate"] = now.strftime("%d/%m/%Y %H:%M:%S")
-        dataframe["dbinuser"] = ""
-        dataframe["dbupdateuser"] = ""
-        dataframe["q_message"] = ""
-        dataframe["dbupdate"] = now.strftime("%d/%m/%Y %H:%M:%S")
-        dataframe["queue_status"] = "0"
-
-        dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
-                        'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
-                        'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
+print("Checkpoint 1")
+while (true):
+    if len(os.listdir('/home/opc/Project/Source') ) == 0:
+        print("Keine Datei vorhanden")
+        time.sleep(1)
+        check = 1
+    else:    
+        allfiles = os.listdir(source)
+        check = 0
         
-        tags_df = dataframe.filter(regex=r'^tag')
+    if check == 0:
+        # Datein in Arbeitsverzeichnis verschieben
+        for f in allfiles:
+            shutil.move(source+ f, destination + f)
+        print("Checkpoint 2")    
+        # Dataframe erstellen
+        path  = "/home/opc/Project/arbeitsverzeichnis"
+        filenames  = glob.glob(path + "/*.csv.gz")
+        print("Checkpoint 3")
+        print(filenames)
+        for filename in filenames:
+            try:
+                print("Checkpoint 4")
+                dataframe = pd.read_csv(filename, sep=',',low_memory=False,compression='gzip')
+                dataframe["q_status"] = 0
+                now = datetime.datetime.now()
+                dataframe["dbindate"] = now.strftime("%Y-%m-%d %H:%M:%S")
+                dataframe["dbinuser"] = "jbaltzer"
+                dataframe["dbupdateuser"] = "jbaltzer"
+                dataframe["q_message"] = "tests"
+                dataframe["dbupdate"] = now.strftime("%Y-%m-%d %H:%M:%S")
+                dataframe["queue_status"] = "0"
 
-        if dataframe.empty:
-                    print("Keine Datensätz zu verarbeiten")
-                    sys.exit(1)
+                dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
+                                'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
+                                'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
+                
+                tags_df = dataframe.filter(regex=r'^tag')
 
-        dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
-        rows = dataframe.values.tolist()
+                if dataframe.empty:
+                            print("Keine Datensätz zu verarbeiten")
+                            sys.exit(1)
+                
+                dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
+                dataframe = dataframe.where((pd.notnull(dataframe)), 0.0)
+                dataframe["lineItem/intervalUsageStart"]= pd.to_datetime(dataframe["lineItem/intervalUsageStart"])
+                dataframe["lineItem/intervalUsageEnd"]= pd.to_datetime(dataframe["lineItem/intervalUsageEnd"])
+                rows = dataframe.values.tolist()
+                
+                counter = 0
+                for x in rows:
+                    cursor.execute("INSERT INTO queue VALUES({},'{}','{}','{}','{}','{}',{},'{}','{}','{}','{}','{}',{},'{}','{}',{},{},'{}','{}','{}');".format(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
+                    counter = counter + 1
+                tests  = ntpath.basename(filename)
+                shutil.move(filename, done +tests)  
 
-        
-
-        cursor.execute("Insert into q_status VALUES(0,'Nicht verarbeitet')")
-        cursor.execute("Insert into q_status VALUES(1,'Verarbeitet')")
-
-        for x in rows:
-            cursor.execute("Insert into q VALUES({dbindate},{dbinuser},{dbupdateuser},{message},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(rows[x][13],rows[x][14],rows[x][15],rows[x][16],rows[x][17],rows[x][18],rows[x][19],rows[x][0],rows[x][1],rows[x][2],rows[x][3],rows[x][4],rows[x][5],rows[x][6],rows[x][7],rows[x][8],rows[x][9],rows[x][10],rows[x][11],rows[x][12]))
-            
-        shutil.move(destination+ filename, done + filename)  
-    except:
-        print("Error in" + filename)
-        # Errorverzeichnis verschieben 
-        now = datetime.datetime.now()
-        new_name = now.strftime("%d_%m_%Y %H_%M_%S") + filename
-        os.rename(destination+filename, destination+ new_name)
-        shutil.move(destination+ new_name, errorverzeichnis+ new_name)
-
-    
-    #TO DOS 
-# Tags tabelle insert 
-# praxitest
-
-
-
-
+                db.commit()
+            except:
+                now = datetime.datetime.now()
+                new_name = now.strftime("%Y_%m_%d %H_%M_%S") + ntpath.basename(filename)
+                shutil.move(filename, errorverzeichnis+ new_name)
+                pass
 
 
     
