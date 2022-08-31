@@ -90,7 +90,7 @@ while (true):
                 db.commit()
             except:
                 now = datetime.datetime.now()
-                new_name = now.strftime("%Y_%m_%d %H_%M_%S") + ntpath.basename(filename)
+                new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename)
                 shutil.move(filename, errorverzeichnis+ new_name)
                 pass
 
