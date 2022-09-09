@@ -120,7 +120,7 @@ while (true):
                                             rows["cost/billingUnitReadable"],
                                             rows["cost/skuUnitDescription"]))
                     except (mysql.connector.Error, mysql.connector.Warning) as e:
-                        print(e)''' # Dieser Teil funktioniert nicht wegen dem Format der Datetime, versuch das mal zum laufen zu bringen. Alternative siehe unten
+                        print(e)''' # Dieser Teil funktioniert nicht wegen dem Format der Datetime, versuch das mal zum laufen zu bringen. Alternative siehe unten.
                 for x in rows:
                     query = "INSERT INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                     cursor.execute(query,(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
@@ -144,3 +144,10 @@ while (true):
 
     
     
+# To Do Liste
+# - Ausbauen des Excepts btw des Umgangs mit auf Fehler gelaufenen Dateien
+# - Einbeziehen der Tags 
+#   - Tabellen in der Datenbank erstellen
+#   - Inserts in die Tabellen
+# - Optimierung 
+
