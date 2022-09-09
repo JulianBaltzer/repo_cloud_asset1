@@ -149,5 +149,7 @@ while (true):
 # - Einbeziehen der Tags 
 #   - Tabellen in der Datenbank erstellen
 #   - Inserts in die Tabellen
-# - Optimierung 
+# - Optimierung und TESTEN 
+
+# Anschließend anfangen mit dem Script von der Queue Datenbank in die Cloud_Assets Datenbank 
 
