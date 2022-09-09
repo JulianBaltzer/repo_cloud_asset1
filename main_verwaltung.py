@@ -45,7 +45,7 @@ def check_resources(resource, s_id):
     print(id)
     return id
 
-def check_tags(tags):
+'''def check_tags(tags):
     cursor.execute("Select * from tags where t_name = {}".format(tags)) 
     row = cursor.fetchall()
     if row == None:
@@ -57,7 +57,7 @@ def check_tags(tags):
 def fill_tag_to_cost(r_id, tag_id, tag_value):
     cursor.execute("Select c_id from costs where c_rid = {}".format(r_id))
     c_id = cursor.fetchall()
-    cursor.execute("Insert into tags_has_cost(tags2c_tid,tags2c_cid,t2c_tagvalue) VALUES ({}, {}, {})".format(tag_id,c_id,tag_value))
+    cursor.execute("Insert into tags_has_cost(tags2c_tid,tags2c_cid,t2c_tagvalue) VALUES ({}, {}, {})".format(tag_id,c_id,tag_value))'''
     
     
 cursor2.execute("Select * from queue")
