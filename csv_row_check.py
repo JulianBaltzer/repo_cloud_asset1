@@ -40,7 +40,8 @@ done = "/home/opc/Project/Output/"
 #Datei in Quellverzeichnis vorhanden?
 if output_information == 0:
     print("Checkpoint 1")
-while (true): #Anstatt while(true) >>
+    
+def buildDataframe():
     if len(os.listdir('/home/opc/Project/Source') ) == 0:
         print("Keine Datei vorhanden")
         time.sleep(1)
@@ -52,8 +53,10 @@ while (true): #Anstatt while(true) >>
         # Datein in Arbeitsverzeichnis verschieben
         for f in allfiles:
             shutil.move(source+ f, destination + f)
+            
         if output_information == 0:
             print("Checkpoint 2")    
+            
         # Dataframe erstellen
         path  = "/home/opc/Project/arbeitsverzeichnis"
         filenames  = glob.glob(path + "/*.csv.gz")
@@ -61,6 +64,7 @@ while (true): #Anstatt while(true) >>
         if output_information == 0:
             print("Checkpoint 3")
             print(filenames)
+            
         for filename in filenames:
             try:
                 if output_information == 0:
@@ -73,7 +77,7 @@ while (true): #Anstatt while(true) >>
                 dataframe["dbupdateuser"] = "jbaltzer"
                 dataframe["q_message"] = "tests"
                 dataframe["dbupdate"] = now.strftime("%Y-%m-%d %H:%M:%S")
-                #dataframe["queue_status"] = "0"
+                dataframe["queue_status"] = "0"
 
                 dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
                                 'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
@@ -82,9 +86,9 @@ while (true): #Anstatt while(true) >>
                 tags_df = dataframe.filter(regex=r'^tag')
 
                 if dataframe.empty:
-                            #print("Keine Datensätze zu verarbeiten")
-                            error_empty = 1
-                            sys.exit(1) 
+                            print("Keine Datensätze zu verarbeiten")
+                            #error_empty = 1
+                            break 
                 
                 dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
                 dataframe = dataframe.where((pd.notnull(dataframe)), 0.0)
@@ -96,6 +100,8 @@ while (true): #Anstatt while(true) >>
                 if output_information == 0:
                     print("Checkpoint 5")
                 counter = 0
+                
+                # Dataframe ""direkt" übertragen, Loop über Dataframe
                 '''for index, rows in dataframe.iterrows():
                     if output_information == 0:
                         print("Checkpoint 6")
@@ -123,6 +129,7 @@ while (true): #Anstatt while(true) >>
                                             rows["cost/skuUnitDescription"]))
                     except (mysql.connector.Error, mysql.connector.Warning) as e:
                         print(e)''' # Dieser Teil funktioniert nicht wegen dem Format der Datetime, versuch das mal zum laufen zu bringen. Alternative siehe unten.
+                        
                 for x in rows:
                     query = "INSERT INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                     cursor.execute(query,(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
@@ -141,14 +148,16 @@ while (true): #Anstatt while(true) >>
                 now = datetime.datetime.now()
                 new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) #Basename nimmt den letzten Teil des Dateipfads
                 
-                # Fehlerprotokolle
-                '''if error_empty == 1:
-                    datei = open('new name', 'w')
-                    datei.write("\r\nFehlerprotokoll: Die Datei hat keinen zu verarbeitenden Inhalt")
-                    else error.....'''
-                    
                 shutil.move(filename, errorverzeichnis+ new_name)
                 pass
+                
+    
+    
+schedule.every().day.at("06:00").do(buildDataframe)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
 
     
