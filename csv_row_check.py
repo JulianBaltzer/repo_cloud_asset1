@@ -9,6 +9,7 @@ import mysql.connector
 import sys
 import ntpath
 import time
+import sqlite3
 from sqlalchemy import create_engine
 import schedule
 
@@ -19,11 +20,11 @@ password='Gu6dQVQbMXFsPQQ7!'
 port=3306
 
 db = mysql.connector.connect(
-    host,
-    database,
-    user,
-    password,
-    port
+    host='localhost',
+    database='queue',
+    user='root',
+    password='Gu6dQVQbMXFsPQQ7!',
+    port=3306
 )
 
 
@@ -46,8 +47,8 @@ done = "/home/opc/Project/Output/"
 #Datei in Quellverzeichnis vorhanden?
 if output_information == 0:
     print("Checkpoint 1")
-    
-def buildDataframe():
+
+while True:
     if len(os.listdir('/home/opc/Project/Source') ) == 0:
         print("Keine Datei vorhanden")
         time.sleep(1)
@@ -98,17 +99,17 @@ def buildDataframe():
                 
                 dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
                 dataframe = dataframe.where((pd.notnull(dataframe)), 0.0)
-                dataframe["dbindate"] = pd.to_datetime(dataframe["dbindate"])
-                dataframe["dbupdate"] = pd.to_datetime(dataframe["dbupdate"])
-                dataframe["lineItem/intervalUsageStart"]= pd.to_datetime(dataframe["lineItem/intervalUsageStart"]) #Hier die Umwandlung in für SQL typisches Datetime Format
-                dataframe["lineItem/intervalUsageEnd"]= pd.to_datetime(dataframe["lineItem/intervalUsageEnd"])
+                #dataframe["dbindate"] = pd.to_datetime(dataframe["dbindate"])
+                #dataframe["dbupdate"] = pd.to_datetime(dataframe["dbupdate"])
+                #dataframe["lineItem/intervalUsageStart"]= pd.to_datetime(dataframe["lineItem/intervalUsageStart"]) #Hier die Umwandlung in für SQL typisches Datetime Format
+                #dataframe["lineItem/intervalUsageEnd"]= pd.to_datetime(dataframe["lineItem/intervalUsageEnd"])
                 rows = dataframe.values.tolist()
                 if output_information == 0:
                     print("Checkpoint 5")
                 counter = 0
                 
                 # Dataframe ""direkt" übertragen, Loop über Dataframe
-                '''for index, rows in dataframe.iterrows():
+                for index, rows in dataframe.iterrows():
                     if output_information == 0:
                         print("Checkpoint 6")
                     try: 
@@ -134,21 +135,29 @@ def buildDataframe():
                                             rows["cost/billingUnitReadable"],
                                             rows["cost/skuUnitDescription"]))
                     except (mysql.connector.Error, mysql.connector.Warning) as e:
-                        print(e)'''
-                        
-                '''engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}".format(host=host, db=database, user=user, pw=password))
-
-                dataframe.to_sql(
-                    name="queue",
-                    con=engine,
-                    if_exists="append",
-                    index=False
-                )'''  # Weitere möglichkeit dataframe direct insert        
-                for x in rows:
-                    query = "INSERT INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                    cursor.execute(query,(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
-                    counter = counter + 1
-                           
+                        print(e)
+                '''try:       
+                    engine = create_engine("mssql+pyodbc://<localhost>:<Gu6dQVQbMXFsPQQ7!>@<queue>")
+                
+                    dataframe.to_sql(
+                        name="queue",
+                        con=engine,
+                        if_exists="append",
+                        index=False
+                    ) 
+                except mysql.connector.Error as err:
+                    print("Something went wrong: {}".format(err))'''
+                
+                    
+                #try:      
+                #    for x in rows:
+                #        
+                #        query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                #        cursor.execute(query,(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
+                #        counter = counter + 1
+                #except mysql.connector.Error as err:
+                #    print("Something went wrong: {}".format(err))
+         
                 if output_information == 0:
                     print("Checkpoint 6.1")
                 tests  = ntpath.basename(filename)
@@ -164,14 +173,6 @@ def buildDataframe():
                 
                 shutil.move(filename, errorverzeichnis+ new_name)
                 pass
-                
-    
-    
-schedule.every().day.at("06:00").do(buildDataframe)
-
-while True:
-    schedule.run_pending()
-    time.sleep(1)
 
 
     
