@@ -10,6 +10,7 @@ import sys
 import ntpath
 import time
 from sqlalchemy import true
+import schedule
 
 db = mysql.connector.connect(
     host='localhost',
@@ -22,7 +23,7 @@ db = mysql.connector.connect(
 
 # Die Dateipfade sind auf den server zugeschnitten. Du solltest auch am besten nur noch auf dem Server Testen! 
 # Zum ausführen auf dem Server python3 Project/csv_row_check.py eingeben
-# Vorher natürlich das script in den Prokect Ordner legen oder ersetzen und vergiss nicht die csv zum testen wieder in dem input zu schieben and öfters die Datenbank leeren 
+# Vorher natürlich das script in den Prokect Ordner legen oder ersetzen und vergiss nicht die csv zum testen wieder in den input zu schieben and öfters die Datenbank leeren 
 
 
 cursor  = db.cursor()
@@ -39,7 +40,7 @@ done = "/home/opc/Project/Output/"
 #Datei in Quellverzeichnis vorhanden?
 if output_information == 0:
     print("Checkpoint 1")
-while (true):
+while (true): #Anstatt while(true) >>
     if len(os.listdir('/home/opc/Project/Source') ) == 0:
         print("Keine Datei vorhanden")
         time.sleep(1)
@@ -72,7 +73,7 @@ while (true):
                 dataframe["dbupdateuser"] = "jbaltzer"
                 dataframe["q_message"] = "tests"
                 dataframe["dbupdate"] = now.strftime("%Y-%m-%d %H:%M:%S")
-                dataframe["queue_status"] = "0"
+                #dataframe["queue_status"] = "0"
 
                 dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
                                 'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
@@ -81,14 +82,15 @@ while (true):
                 tags_df = dataframe.filter(regex=r'^tag')
 
                 if dataframe.empty:
-                            print("Keine Datensätz zu verarbeiten")
-                            sys.exit(1)
+                            #print("Keine Datensätze zu verarbeiten")
+                            error_empty = 1
+                            sys.exit(1) 
                 
                 dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
                 dataframe = dataframe.where((pd.notnull(dataframe)), 0.0)
                 dataframe["dbindate"] = pd.to_datetime(dataframe["dbindate"])
                 dataframe["dbupdate"] = pd.to_datetime(dataframe["dbupdate"])
-                dataframe["lineItem/intervalUsageStart"]= pd.to_datetime(dataframe["lineItem/intervalUsageStart"]) #Hier die umwandlung in für SQL typisches Datetime Format
+                dataframe["lineItem/intervalUsageStart"]= pd.to_datetime(dataframe["lineItem/intervalUsageStart"]) #Hier die Umwandlung in für SQL typisches Datetime Format
                 dataframe["lineItem/intervalUsageEnd"]= pd.to_datetime(dataframe["lineItem/intervalUsageEnd"])
                 rows = dataframe.values.tolist()
                 if output_information == 0:
@@ -138,6 +140,13 @@ while (true):
             except:
                 now = datetime.datetime.now()
                 new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) #Basename nimmt den letzten Teil des Dateipfads
+                
+                # Fehlerprotokolle
+                '''if error_empty == 1:
+                    datei = open('new name', 'w')
+                    datei.write("\r\nFehlerprotokoll: Die Datei hat keinen zu verarbeitenden Inhalt")
+                    else error.....'''
+                    
                 shutil.move(filename, errorverzeichnis+ new_name)
                 pass
 
