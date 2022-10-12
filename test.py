@@ -76,3 +76,8 @@ engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}".format(host=hos
                     index=False
                 )  # Weitere möglichkeit dataframe direct insert
 '''
+
+#dataframe["dbindate"] = pd.to_datetime(dataframe["dbindate"])
+                #dataframe["dbupdate"] = pd.to_datetime(dataframe["dbupdate"])
+                #dataframe["lineItem/intervalUsageStart"]= pd.to_datetime(dataframe["lineItem/intervalUsageStart"]) #Hier die Umwandlung in für SQL typisches Datetime Format
+                #dataframe["lineItem/intervalUsageEnd"]= pd.to_datetime(dataframe["lineItem/intervalUsageEnd"])
