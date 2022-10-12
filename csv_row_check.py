@@ -163,7 +163,8 @@ def buildDataframe():
                 tests  = ntpath.basename(filename)
                 if output_information == 0:
                     print("Checkpoint 6.2")
-                shutil.move(filename, done +tests)  
+                now = datetime.datetime.now()
+                shutil.move(filename, done + now.strftime("%Y_%m_%d %H_%M_%S") + tests)  
                 if output_information == 0:
                     print("Checkpoint 7")
                 db.commit()
@@ -175,7 +176,7 @@ def buildDataframe():
                 pass
             
             
-schedule.every().day.at("06:00").do(buildDataframe)
+schedule.every(20).seconds.do(buildDataframe)
 
 while True:
     schedule.run_pending()
