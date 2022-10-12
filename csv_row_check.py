@@ -48,7 +48,7 @@ done = "/home/opc/Project/Output/"
 if output_information == 0:
     print("Checkpoint 1")
 
-while True:
+def buildDataframe():
     if len(os.listdir('/home/opc/Project/Source') ) == 0:
         print("Keine Datei vorhanden")
         time.sleep(1)
@@ -173,6 +173,14 @@ while True:
                 
                 shutil.move(filename, errorverzeichnis+ new_name)
                 pass
+            
+            
+schedule.every().day.at("06:00").do(buildDataframe)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
 
 
     
