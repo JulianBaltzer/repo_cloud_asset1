@@ -9,15 +9,21 @@ import mysql.connector
 import sys
 import ntpath
 import time
-from sqlalchemy import true
+from sqlalchemy import create_engine
 import schedule
 
+host='localhost'
+database='queue'
+user='root'
+password='Gu6dQVQbMXFsPQQ7!'
+port=3306
+
 db = mysql.connector.connect(
-    host='localhost',
-    database='queue',
-    user='root',
-    password='Gu6dQVQbMXFsPQQ7!',
-    port=3306
+    host,
+    database,
+    user,
+    password,
+    port
 )
 
 
@@ -128,8 +134,16 @@ def buildDataframe():
                                             rows["cost/billingUnitReadable"],
                                             rows["cost/skuUnitDescription"]))
                     except (mysql.connector.Error, mysql.connector.Warning) as e:
-                        print(e)''' # Dieser Teil funktioniert nicht wegen dem Format der Datetime, versuch das mal zum laufen zu bringen. Alternative siehe unten.
+                        print(e)'''
                         
+                '''engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}".format(host=host, db=database, user=user, pw=password))
+
+                dataframe.to_sql(
+                    name="queue",
+                    con=engine,
+                    if_exists="append",
+                    index=False
+                )'''  # Weitere möglichkeit dataframe direct insert        
                 for x in rows:
                     query = "INSERT INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                     cursor.execute(query,(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
