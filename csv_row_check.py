@@ -9,179 +9,130 @@ import mysql.connector
 import sys
 import ntpath
 import time
-import sqlite3
 from sqlalchemy import create_engine
-import schedule
 
-host='localhost'
-database='queue'
-user='root'
-password='Gu6dQVQbMXFsPQQ7!'
-port=3306
+
 
 db = mysql.connector.connect(
-    host,
-    database,
-    user,
-    password,
-    port
+    host='localhost',
+    database='queue',
+    user='root',
+    password='Gu6dQVQbMXFsPQQ7!',
+    port=3306
 )
 
 cursor  = db.cursor()
 check = 0
 output_information = 0 # Auf 1 setzten, wenn keine Meldungen mehr ausgegeben werden sollen
-# Quellverzeichnis
-source = "/home/opc/Project/Source/"
-# Arbeitsverzeichnis
-destination = "/home/opc/Project/arbeitsverzeichnis/"
-#Errorverzeichnis
-errorverzeichnis = "/home/opc/Project/error/"
 
+source = "/home/opc/Project/Source/"
+destination = "/home/opc/Project/arbeitsverzeichnis/"
+errorverzeichnis = "/home/opc/Project/error/"
 done = "/home/opc/Project/Output/"
-#Datei in Quellverzeichnis vorhanden?
+
+
 if output_information == 0:
     print("Checkpoint 1")
 
-def buildDataframe():
-    if len(os.listdir('/home/opc/Project/Source') ) == 0:
-        print("Keine Datei vorhanden")
-        time.sleep(1)
-        check = 1
-    else:    
-        allfiles = os.listdir(source)
-        check = 0
-    if check == 0:
-        # Datein in Arbeitsverzeichnis verschieben
-        for f in allfiles:
-            shutil.move(source+ f, destination + f)
-            
-        if output_information == 0:
-            print("Checkpoint 2")    
-            
-        
-        path  = "/home/opc/Project/arbeitsverzeichnis"
-        filenames  = glob.glob(path + "/*.csv.gz")
-        
-        if output_information == 0:
-            print("Checkpoint 3")
-            print(filenames)
-            
-        for filename in filenames:
-            try:
-                if output_information == 0:
-                    print("Checkpoint 4")
-                dataframe = pd.read_csv(filename, sep=',',low_memory=False,compression='gzip')
-                dataframe["q_status"] = 0
-                now = datetime.datetime.now()
-                dataframe["dbindate"] = now.strftime("%Y-%m-%d %H:%M:%S")
-                dataframe["dbinuser"] = "jbaltzer"
-                dataframe["dbupdateuser"] = "jbaltzer"
-                dataframe["q_message"] = "tests"
-                dataframe["dbupdate"] = now.strftime("%Y-%m-%d %H:%M:%S")
-                dataframe["queue_status"] = "0"
 
-                dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
-                                'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
-                                'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
-                
-                tags_df = dataframe.filter(regex=r'^tag')
-
-                if dataframe.empty:
-                            print("Keine Datensätze zu verarbeiten")
-                            #error_empty = 1
-                            break 
-                
-                dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
-                dataframe = dataframe.where((pd.notnull(dataframe)), 0.0)
-                rows = dataframe.values.tolist()
-                if output_information == 0:
-                    print("Checkpoint 5")
-                counter = 0
-                
-                # Dataframe ""direkt" übertragen, Loop über Dataframe
-                for index, rows in dataframe.iterrows():
-                    if output_information == 0:
-                        print("Checkpoint 6")
-                    try: 
-                        query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-                        cursor.execute(query,(rows["q_status"],
-                                            rows["dbindate"],
-                                            rows["dbinuser"],
-                                            rows["dbupdateuser"],
-                                            rows["q_message"],
-                                            rows["dbupdate"],
-                                            rows["queue_status"],
-                                            rows["lineItem/intervalUsageStart"],
-                                            rows["lineItem/intervalUsageEnd"],
-                                            rows["product/service"],
-                                            rows["product/compartmentName"],
-                                            rows["product/resourceId"],
-                                            rows["usage/billedQuantity"],
-                                            rows["cost/productSku"],
-                                            rows["product/Description"],
-                                            rows["cost/unitPrice"],
-                                            rows["cost/myCost"],
-                                            rows["cost/currencyCode"],
-                                            rows["cost/billingUnitReadable"],
-                                            rows["cost/skuUnitDescription"]))
-                    except (mysql.connector.Error, mysql.connector.Warning) as e:
-                        print(e)
-                        file = open("errors.txt" ,"w")
-                        file.write(e + "\n")
-                        file.close()
-                '''try:       
-                    engine = create_engine("mssql+pyodbc://<localhost>:<Gu6dQVQbMXFsPQQ7!>@<queue>")
-                
-                    dataframe.to_sql(
-                        name="queue",
-                        con=engine,
-                        if_exists="append",
-                        index=False
-                    ) 
-                except mysql.connector.Error as err:
-                    print("Something went wrong: {}".format(err))''' 
-                      
-                #try:      
-                #    for x in rows:  
-                #        query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                #        cursor.execute(query,(0,rows[counter][14],rows[counter][15],rows[counter][16],rows[counter][17],rows[counter][18],rows[counter][19],rows[counter][0],rows[counter][1],rows[counter][2],rows[counter][3],rows[counter][4],rows[counter][5],rows[counter][6],rows[counter][7],rows[counter][8],rows[counter][9],rows[counter][10],rows[counter][11],rows[counter][12]))
-                #        counter = counter + 1
-                #except mysql.connector.Error as err:
-                #    print("Something went wrong: {}".format(err))
-         
-                if output_information == 0:
-                    print("Checkpoint 6.1")
-                tests  = ntpath.basename(filename)
-                if output_information == 0:
-                    print("Checkpoint 6.2")
-                now = datetime.datetime.now()
-                shutil.move(filename, done + now.strftime("%Y_%m_%d %H_%M_%S") + tests)  
-                if output_information == 0:
-                    print("Checkpoint 7")
-                db.commit()
-            except:
-                now = datetime.datetime.now()
-                new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) #Basename nimmt den letzten Teil des Dateipfads 
-                shutil.move(filename, errorverzeichnis+ new_name)
-                pass
-            
-            
-schedule.every(20).seconds.do(buildDataframe)
-
-while True:
-    schedule.run_pending()
+if len(os.listdir('/home/opc/Project/Source') ) == 0:
+    print("Keine Datei vorhanden")
     time.sleep(1)
-
-
-
+    check = 1
+else:    
+    allfiles = os.listdir(source)
+    check = 0
+if check == 0:
+    # Datein in Arbeitsverzeichnis verschieben
+    for f in allfiles:
+        shutil.move(source+ f, destination + f)
+        
+    if output_information == 0:
+        print("Checkpoint 2")    
+        
     
+    path  = "/home/opc/Project/arbeitsverzeichnis"
+    filenames  = glob.glob(path + "/*.csv.gz")
     
-# To Do Liste
-# - Ausbauen des Excepts btw des Umgangs mit auf Fehler gelaufenen Dateien
-# - Einbeziehen der Tags 
-#   - Tabellen in der Datenbank erstellen
-#   - Inserts in die Tabellen
-# - Optimierung und TESTEN 
+    if output_information == 0:
+        print("Checkpoint 3")
+        print(filenames)
+        
+    for filename in filenames:
+        try:
+            if output_information == 0:
+                print("Checkpoint 4")
+            dataframe = pd.read_csv(filename, sep=',',low_memory=False,compression='gzip')
+            dataframe["q_status"] = 0
+            now = datetime.datetime.now()
+            dataframe["dbindate"] = now.strftime("%Y-%m-%d %H:%M:%S")
+            dataframe["dbinuser"] = "jbaltzer"
+            dataframe["dbupdateuser"] = "jbaltzer"
+            dataframe["q_message"] = "tests"
+            dataframe["dbupdate"] = now.strftime("%Y-%m-%d %H:%M:%S")
+            dataframe["queue_status"] = "0"
 
-# Anschließend anfangen mit dem Script von der Queue Datenbank in die Cloud_Assets Datenbank 
+            dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
+                            'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
+                            'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
+            
+            tags_df = dataframe.filter(regex=r'^tag')
+
+            if dataframe.empty:
+                        print("Keine Datensätze zu verarbeiten")
+                        break 
+            
+            dataframe = dataframe[dataframe.columns.drop(list(dataframe.filter(regex=r'^tag')))]
+            dataframe = dataframe.where((pd.notnull(dataframe)), 0.0)
+            rows = dataframe.values.tolist()
+            if output_information == 0:
+                print("Checkpoint 5")
+            
+            for index, rows in dataframe.iterrows():
+                if output_information == 0:
+                    print("Checkpoint 6")
+                try: 
+                    query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+                    cursor.execute(query,(rows["q_status"],
+                                        rows["dbindate"],
+                                        rows["dbinuser"],
+                                        rows["dbupdateuser"],
+                                        rows["q_message"],
+                                        rows["dbupdate"],
+                                        rows["queue_status"],
+                                        rows["lineItem/intervalUsageStart"],
+                                        rows["lineItem/intervalUsageEnd"],
+                                        rows["product/service"],
+                                        rows["product/compartmentName"],
+                                        rows["product/resourceId"],
+                                        rows["usage/billedQuantity"],
+                                        rows["cost/productSku"],
+                                        rows["product/Description"],
+                                        rows["cost/unitPrice"],
+                                        rows["cost/myCost"],
+                                        rows["cost/currencyCode"],
+                                        rows["cost/billingUnitReadable"],
+                                        rows["cost/skuUnitDescription"]))
+                except (mysql.connector.Error, mysql.connector.Warning) as e:
+                    raise
+
+            if output_information == 0:
+                print("Checkpoint 6.1")
+            tests  = ntpath.basename(filename)
+            if output_information == 0:
+                print("Checkpoint 6.2")
+            now = datetime.datetime.now()
+            shutil.move(filename, done + now.strftime("%Y_%m_%d %H_%M_%S") + tests)  
+            if output_information == 0:
+                print("Checkpoint 7")
+            db.commit()
+        except:
+            now = datetime.datetime.now()
+            new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) 
+            shutil.move(filename, errorverzeichnis+ new_name)
+            file = open("errors.txt" ,"w")
+            file.write(e + "\n")
+            file.close()
+            pass
+            
 
