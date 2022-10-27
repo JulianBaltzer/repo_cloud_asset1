@@ -21,6 +21,21 @@ db = mysql.connector.connect(
     port=3306
 )
 
+
+
+def get_set_tags(tags):
+    cursor.execute("Select * from tags where t_name = {}".format(tags)) 
+    row = list(cursor.fetchall())
+    if row == None:
+        cursor.execute("Insert into tags (t_name) VALUES ({})".format(tags))
+    cursor.execute("Select t_id from tags where t_name = {}".format(tags))
+    id = list(cursor.fetchall())
+    return id   
+
+def fill_tag_to_asset(q_id, tag_id, tag_value):
+    cursor.execute("Insert into tags_to_asset(tag_id,t_id,a_id,t_value) VALUES ({}, {}, {})".format(tag_id[0][0],q_id[0][0],tag_value))
+    
+    
 cursor  = db.cursor()
 check = 0
 output_information = 0 # Auf 1 setzten, wenn keine Meldungen mehr ausgegeben werden sollen
@@ -50,7 +65,7 @@ if check == 0:
     if output_information == 0:
         print("Checkpoint 2")    
         
-    
+   
     path  = "/home/opc/Project/arbeitsverzeichnis"
     filenames  = glob.glob(path + "/*.csv.gz")
     
@@ -78,6 +93,10 @@ if check == 0:
             
             tags_df = dataframe.filter(regex=r'^tag')
 
+            
+            for column in tags_df.columns:
+                id = get_set_tags(column)
+                
             if dataframe.empty:
                         print("Keine Datensätze zu verarbeiten")
                         break 
@@ -113,7 +132,16 @@ if check == 0:
                                         rows["cost/currencyCode"],
                                         rows["cost/billingUnitReadable"],
                                         rows["cost/skuUnitDescription"]))
-                except (mysql.connector.Error, mysql.connector.Warning) as e:
+                    db.commit()
+                    
+                    cursor.execute("Select q_id from queue where lineItem/intervalUsageStart = {} AND product/resourceId = {}".format(rows["lineItem/intervalUsageStart"],rows["product/resourceId"]))
+                    q_id = list(cursor.fetchall())
+                    counter = q_id[0][0]
+                    for values in tags_df.columns:
+                        fill_tag_to_asset(q_id,id,tags_df[column][counter-1])
+                        
+                    
+                except:
                     raise
 
             if output_information == 0:
@@ -131,7 +159,7 @@ if check == 0:
             new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) 
             shutil.move(filename, errorverzeichnis+ new_name)
             file = open("errors.txt" ,"w")
-            file.write(e + "\n")
+            file.write("Error in" + filename + "\n")
             file.close()
             pass
             
