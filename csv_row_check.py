@@ -10,8 +10,8 @@ import sys
 import ntpath
 import time
 from sqlalchemy import create_engine
-
-
+from uuid import uuid4
+import random
 
 db = mysql.connector.connect(
     host='localhost',
@@ -27,13 +27,13 @@ def get_set_tags(tags):
     cursor.execute("Select * from tags where t_name = {}".format(tags)) 
     row = list(cursor.fetchall())
     if row == None:
-        cursor.execute("Insert into tags (t_name) VALUES ({})".format(tags))
+        cursor.execute("Insert into tags (tag_ID,t_name) VALUES ({},{})".format(random.getrandbits(32),tags))
     cursor.execute("Select t_id from tags where t_name = {}".format(tags))
     id = list(cursor.fetchall())
     return id   
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
-    cursor.execute("Insert into tags_to_asset(tag_id,t_id,a_id,t_value) VALUES ({}, {}, {})".format(tag_id[0][0],q_id[0][0],tag_value))
+    cursor.execute("Insert into tags_to_asset(tag_id,t_id,a_id,t_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
     
     
 cursor  = db.cursor()
@@ -86,17 +86,16 @@ if check == 0:
             dataframe["q_message"] = "tests"
             dataframe["dbupdate"] = now.strftime("%Y-%m-%d %H:%M:%S")
             dataframe["queue_status"] = "0"
-
+            
             dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
                             'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
                             'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
             
             tags_df = dataframe.filter(regex=r'^tag')
 
+            print("Checkpoint 4.1")
             
-            for column in tags_df.columns:
-                id = get_set_tags(column)
-                
+            print("Checkpoint 4.2")
             if dataframe.empty:
                         print("Keine Datensätze zu verarbeiten")
                         break 
@@ -133,13 +132,17 @@ if check == 0:
                                         rows["cost/billingUnitReadable"],
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
-                    
+                    rows["lineItem/intervalUsageStart"] = pd.to_datetime(rows["lineItem/intervalUsageStart"])
+                    rows["lineItem/intervalUsageStart"]= pd.DatetimeIndex(pd.to_datetime(rows["lineItem/intervalUsageStart"])).tz_convert(None)
                     cursor.execute("Select q_id from queue where lineItem/intervalUsageStart = {} AND product/resourceId = {}".format(rows["lineItem/intervalUsageStart"],rows["product/resourceId"]))
                     q_id = list(cursor.fetchall())
                     counter = q_id[0][0]
-                    for values in tags_df.columns:
-                        fill_tag_to_asset(q_id,id,tags_df[column][counter-1])
+                    for column in tags_df.columns:
+                        id = get_set_tags(column)
+                        for values in tags_df.columns:
+                            fill_tag_to_asset(q_id,id,tags_df[values][counter-1])
                 except:
+                    #print(e)
                     raise
 
             if output_information == 0:
@@ -152,7 +155,8 @@ if check == 0:
             if output_information == 0:
                 print("Checkpoint 7")
             db.commit()
-        except:
+        except Exception as e:
+            print(repr(e))
             now = datetime.datetime.now()
             new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) 
             shutil.move(filename, errorverzeichnis+ new_name)

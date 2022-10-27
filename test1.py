@@ -1,14 +1,10 @@
-from multiprocessing.sharedctypes import Value
+from uuid import uuid4
+import random
 
 
-eingabe = input("alter eingeben")
 
-try:
-    #if(int(eingabe) > 150):
-       # raise ValueError
-    print("toll")
-except ValueError:
-    print("gdfgdfgdgf")
-    
-except TypeError:
-    print("typeerror")
+test1 = random.getrandbits(32)
+test = uuid4
+
+print(str(test))
+print(test1)
