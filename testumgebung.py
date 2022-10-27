@@ -54,10 +54,10 @@ if check == 0:
             tags_df = dataframe.filter(regex=r'^tag')
 
             counter = 0
-            for column in tags_df.columns:
-                print(column)
-                print(tags_df[column][1])
-                break
+            dataframe["lineItem/intervalUsageStart"]= pd.DatetimeIndex(pd.to_datetime(dataframe["lineItem/intervalUsageStart"])).tz_convert(None)
+            
+            print(dataframe["lineItem/intervalUsageStart"][0])
+            
             
 
             
