@@ -139,8 +139,6 @@ if check == 0:
                     counter = q_id[0][0]
                     for values in tags_df.columns:
                         fill_tag_to_asset(q_id,id,tags_df[column][counter-1])
-                        
-                    
                 except:
                     raise
 
