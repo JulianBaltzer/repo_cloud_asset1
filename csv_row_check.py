@@ -132,15 +132,18 @@ if check == 0:
                                         rows["cost/billingUnitReadable"],
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
+                    print(rows["lineItem/intervalUsageStart"])
                     rows["lineItem/intervalUsageStart"] = pd.to_datetime(rows["lineItem/intervalUsageStart"])
+                    print(rows["lineItem/intervalUsageStart"])
                     rows["lineItem/intervalUsageStart"]= pd.DatetimeIndex(pd.to_datetime(rows["lineItem/intervalUsageStart"])).tz_convert(None)
+                    print(rows["lineItem/intervalUsageStart"])
                     cursor.execute("Select q_id from queue where lineItem/intervalUsageStart = {} AND product/resourceId = {}".format(rows["lineItem/intervalUsageStart"],rows["product/resourceId"]))
                     q_id = list(cursor.fetchall())
                     counter = q_id[0][0]
                     for column in tags_df.columns:
                         id = get_set_tags(column)
                         for values in tags_df.columns:
-                            fill_tag_to_asset(q_id,id,tags_df[values][counter-1])
+                            fill_tag_to_asset(q_id,id,tags_df[values][counter])
                 except:
                     #print(e)
                     raise
