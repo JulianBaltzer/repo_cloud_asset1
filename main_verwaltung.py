@@ -69,7 +69,8 @@ list_of_status = list(cursor2.fetchall())
 counter = 0
 for x in list_of_queue:
     #Alle übergaben an die Funktionen sind nicht korrekt und müssen geändert werden
-    startzeit = list_of_queue[counter][7]
+    #((sdfsd,sdfsdf,sdf)(sdfsdf,sdf,sdf))
+    startzeit = x[7]
     endzeit = list_of_queue[counter][8]
     service = list_of_queue[counter][9]
     compartment = list_of_queue[counter][10]

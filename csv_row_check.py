@@ -21,22 +21,32 @@ db = mysql.connector.connect(
     port=3306
 )
 
+
 def get_set_tags(tags):
-    cursor.execute("Select * from tags where t_name = {}".format(tags)) 
+    query  = "Select max(tag_ID) from tags"
+    cursor.execute(query)
+    max  = list(cursor.fetchall())
+    
+    cursor.execute("Select tag_id from tags where t_name = {}".format(tags)) 
     row = list(cursor.fetchall())
+    
     if row == None:
-        cursor.execute("Insert into tags (tag_ID,t_name) VALUES ({},{})".format(random.getrandbits(32),tags))
-    cursor.execute("Select t_id from tags where t_name = {}".format(tags))
-    id = list(cursor.fetchall())
-    return id   
+        if max[0][0] == None:
+            max[0][0] = 0
+        max[0][0] = max[0][0] + 1
+        cursor.execute("Insert into tags (tag_ID,t_name) VALUES ({},{})".format(max[0][0],tags)) #random bits umbauen zu einem counter
+        return max[0][0]
+    return row   
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
-    cursor.execute("Insert into tags_to_asset(tag_id,t_id,a_id,t_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
+    cursor.execute("Insert into tags_to_asset(t_ID,tag_ID,a_id,t_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
     
     
 cursor  = db.cursor()
 check = 0
-output_information = 0 # Auf 1 setzten, wenn keine Meldungen mehr ausgegeben werden sollen
+output_information = 0 
+
+
 
 source = "/home/opc/Project/Source/"
 destination = "/home/opc/Project/arbeitsverzeichnis/"
@@ -56,7 +66,6 @@ else:
     allfiles = os.listdir(source)
     check = 0
 if check == 0:
-    # Datein in Arbeitsverzeichnis verschieben
     for f in allfiles:
         shutil.move(source+ f, destination + f)
         
@@ -73,6 +82,7 @@ if check == 0:
         
     for filename in filenames:
         try:
+            counter = 0
             if output_information == 0:
                 print("Checkpoint 4")
             dataframe = pd.read_csv(filename, sep=',',low_memory=False,compression='gzip')
@@ -108,8 +118,9 @@ if check == 0:
                 if output_information == 0:
                     print("Checkpoint 6")
                 try: 
+                    q_id = uuid4()
                     query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-                    cursor.execute(query,(rows["q_status"],
+                    cursor.execute(query,(q_id,
                                         rows["dbindate"],
                                         rows["dbinuser"],
                                         rows["dbupdateuser"],
@@ -130,19 +141,11 @@ if check == 0:
                                         rows["cost/billingUnitReadable"],
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
-                    timetest = rows["lineItem/intervalUsageStart"] 
-                    query_new  = "Select q_id from queue where 'lineItem/intervalUsageStart' = %s AND 'product/resourceId' = %s;"
-                    #2022-02-06 20:00:00 = 2022-02-06T20:00Z
-                    print(timetest)
-                    cursor.execute(query_new,(timetest,rows["product/resourceId"]))
-                    q_id = list(cursor.fetchall())
-                    print(timetest)
-                    print(q_id)
-                    counter = q_id[0][0]
                     for column in tags_df.columns:
                         id = get_set_tags(column)
                         for values in tags_df.columns:
                             fill_tag_to_asset(q_id,id,tags_df[values][counter])
+                    counter = counter + 1
                 except:
                     raise
 
