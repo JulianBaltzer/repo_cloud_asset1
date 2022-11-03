@@ -27,20 +27,21 @@ def get_set_tags(tags):
     cursor.execute(query)
     max  = list(cursor.fetchall())
     
-    cursor.execute("Select tag_id from tags where t_name = {}".format(tags)) 
+    cursor.execute("Select tag_id from tags where tag_name = {}".format(tags)) 
     row = list(cursor.fetchall())
     
     if row == None:
         if max[0][0] == None:
             max[0][0] = 0
         max[0][0] = max[0][0] + 1
-        cursor.execute("Insert into tags (tag_ID,t_name) VALUES ({},{})".format(max[0][0],tags)) #random bits umbauen zu einem counter
+        cursor.execute("Insert into tags (tag_ID,tag_name) VALUES ({},{})".format(max[0][0],tags)) #random bits umbauen zu einem counter
         return max[0][0]
     return row   
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
-    cursor.execute("Insert into tags_to_asset(t_ID,tag_ID,a_id,t_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
+    cursor.execute("Insert into tags_to_asset(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
     
+
     
 cursor  = db.cursor()
 check = 0
