@@ -21,8 +21,6 @@ db = mysql.connector.connect(
     port=3306
 )
 
-
-
 def get_set_tags(tags):
     cursor.execute("Select * from tags where t_name = {}".format(tags)) 
     row = list(cursor.fetchall())
@@ -132,20 +130,20 @@ if check == 0:
                                         rows["cost/billingUnitReadable"],
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
-                    print(rows["lineItem/intervalUsageStart"])
-                    rows["lineItem/intervalUsageStart"] = pd.to_datetime(rows["lineItem/intervalUsageStart"])
-                    print(rows["lineItem/intervalUsageStart"])
-                    rows["lineItem/intervalUsageStart"]= pd.DatetimeIndex(pd.to_datetime(rows["lineItem/intervalUsageStart"])).tz_convert(None)
-                    print(rows["lineItem/intervalUsageStart"])
-                    cursor.execute("Select q_id from queue where lineItem/intervalUsageStart = {} AND product/resourceId = {}".format(rows["lineItem/intervalUsageStart"],rows["product/resourceId"]))
+                    timetest = rows["lineItem/intervalUsageStart"] 
+                    query_new  = "Select q_id from queue where 'lineItem/intervalUsageStart' = %s AND 'product/resourceId' = %s;"
+                    #2022-02-06 20:00:00 = 2022-02-06T20:00Z
+                    print(timetest)
+                    cursor.execute(query_new,(timetest,rows["product/resourceId"]))
                     q_id = list(cursor.fetchall())
+                    print(timetest)
+                    print(q_id)
                     counter = q_id[0][0]
                     for column in tags_df.columns:
                         id = get_set_tags(column)
                         for values in tags_df.columns:
                             fill_tag_to_asset(q_id,id,tags_df[values][counter])
                 except:
-                    #print(e)
                     raise
 
             if output_information == 0:
