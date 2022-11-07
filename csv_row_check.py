@@ -1,5 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 09.09.2022
-from ast import Pass
+from ast import In, Pass
 import shutil
 import os
 import pandas as pd
@@ -15,31 +15,44 @@ import random
 
 db = mysql.connector.connect(
     host='localhost',
-    database='queue',
+    database='Queue',
     user='root',
     password='Gu6dQVQbMXFsPQQ7!',
     port=3306
 )
 
+mycursor = db.cursor()
 
 def get_set_tags(tags):
-    query  = "Select max(tag_ID) from tags"
-    cursor.execute(query)
-    max  = list(cursor.fetchall())
-    
-    cursor.execute("Select tag_id from tags where tag_name = {}".format(tags)) 
-    row = list(cursor.fetchall())
+    query1  = "Select max(tag_ID) from tags"
+    tags = []
+    mycursor.execute(query1)
+    print("Checkpoint new")
+
+    max  = str(cursor.fetchone())
+    print("Checkpoint neu1")
+    query2 = "Select tag_ID from tags where tag_name = %s"
+
+    mycursor.executemany(query2, tags) 
+    print("Checkpoint neu2")
+    row = str(cursor.fetchone())
+    print("Checkpoint neu3")
     
     if row == None:
         if max[0][0] == None:
             max[0][0] = 0
         max[0][0] = max[0][0] + 1
-        cursor.execute("Insert into tags (tag_ID,tag_name) VALUES ({},{})".format(max[0][0],tags)) #random bits umbauen zu einem counter
+        
+        
+        print("checkpoint neu2")
+        cursor.execute("Insert into tags (tag_ID,tag_name) VALUES ({},{})".format(max[0][0],tags[0][0])) #random bits umbauen zu einem counter
         return max[0][0]
-    return row   
+    print("checkpoint neu 3")
+    return row[0][0]   
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
-    cursor.execute("Insert into tags_to_asset(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
+    print("Checkpoint Charlie")
+    cursor.execute("Insert into t_to_q(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
     
 
     
@@ -119,7 +132,7 @@ if check == 0:
                 if output_information == 0:
                     print("Checkpoint 6")
                 try: 
-                    q_id = uuid4()
+                    q_id = str(uuid4())
                     query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
                     cursor.execute(query,(q_id,
                                         rows["dbindate"],
@@ -143,6 +156,7 @@ if check == 0:
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
                     for column in tags_df.columns:
+                        print(type(column))
                         id = get_set_tags(column)
                         for values in tags_df.columns:
                             fill_tag_to_asset(q_id,id,tags_df[values][counter])
