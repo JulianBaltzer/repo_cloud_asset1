@@ -23,36 +23,61 @@ db = mysql.connector.connect(
 
 mycursor = db.cursor()
 
-def get_set_tags(tags):
-    query1  = "Select max(tag_ID) from tags"
-    tags = []
-    mycursor.execute(query1)
-    print("Checkpoint new")
-
-    max  = str(cursor.fetchone())
-    print("Checkpoint neu1")
-    query2 = "Select tag_ID from tags where tag_name = %s"
-
-    mycursor.executemany(query2, tags) 
-    print("Checkpoint neu2")
-    row = str(cursor.fetchone())
-    print("Checkpoint neu3")
+def get_set_tags(tags_data):
     
-    if row == None:
-        if max[0][0] == None:
-            max[0][0] = 0
-        max[0][0] = max[0][0] + 1
+
+    tags_data = str(tags_data)
+    print("Checkpoint neu1")
+    query2 = "Select tag_ID from tags where tag_name = (%s)"
+
+    
+    mycursor.execute(query2, (tags_data,), False)
+    print("Checkpoint neu2")
+    row = cursor.fetchone()
+    print("Checkpoint neu3")
+    print(row)
+  
+    print(type(row))
+    
+    
+    if not row:
+        print("dgdfgdfgjiodfg")
+        query1  = "Select max(tag_ID) from tags"
+        mycursor.execute(query1)
+        max  = list(cursor.fetchone())
+        print(max[0])
+        if max[0] == None:
+            print("if not max")
+            max[0] = 0
+        max[0] = max[0] + 1
+
+        print("checkpoint neu2_1")
+        print(max)
+        print(tags_data)
+        #query = "Insert into tags(tag_ID,tag_name) VALUES (%i,%s)"
+        cursor.execute("Insert into tags(tag_ID,tag_name) VALUES ({},'{}')".format(max[0],tags_data))
+        db.commit()
         
-        
-        print("checkpoint neu2")
-        cursor.execute("Insert into tags (tag_ID,tag_name) VALUES ({},{})".format(max[0][0],tags[0][0])) #random bits umbauen zu einem counter
-        return max[0][0]
-    print("checkpoint neu 3")
-    return row[0][0]   
+        return max[0]
+    print("checkpoint neu 3_1")
+    return list(row)   
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
     print("Checkpoint Charlie")
-    cursor.execute("Insert into t_to_q(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, {})".format(random.getrandbits(32),tag_id[0][0],q_id[0][0],tag_value))
+    query1  = "Select max(t_ID) from t_to_q"
+    mycursor.execute(query1)
+    max  = list(cursor.fetchone())
+    
+    if max[0] == None:
+            print("if not max")
+            max[0] = 0
+    max[0] = max[0] + 1
+    
+    print(max)
+    print(tag_id)
+    print(tag_value)
+    print(q_id)
+    cursor.execute("Insert into t_to_q(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, '{}', '{}')".format(max[0],tag_id,q_id,tag_value))
     
 
     
@@ -116,7 +141,8 @@ if check == 0:
             tags_df = dataframe.filter(regex=r'^tag')
 
             print("Checkpoint 4.1")
-            
+            print(tags_df)
+            print(tags_df.iloc[[0][0]])
             print("Checkpoint 4.2")
             if dataframe.empty:
                         print("Keine Datensätze zu verarbeiten")
@@ -127,10 +153,10 @@ if check == 0:
             rows = dataframe.values.tolist()
             if output_information == 0:
                 print("Checkpoint 5")
-            
+            list_of_q_ids = []
             for index, rows in dataframe.iterrows():
-                if output_information == 0:
-                    print("Checkpoint 6")
+                #if output_information == 0:
+                    #print("Checkpoint 6")
                 try: 
                     q_id = str(uuid4())
                     query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
@@ -155,15 +181,22 @@ if check == 0:
                                         rows["cost/billingUnitReadable"],
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
-                    for column in tags_df.columns:
-                        print(type(column))
-                        id = get_set_tags(column)
-                        for values in tags_df.columns:
-                            fill_tag_to_asset(q_id,id,tags_df[values][counter])
-                    counter = counter + 1
+                    
+                    list_of_q_ids.append(str(q_id))
+                    
                 except:
                     raise
-
+            for column in tags_df.columns:
+                id = get_set_tags(column)
+                for values in range(0,len(list_of_q_ids)):
+                    #print(list_of_q_ids[counter])
+                    #print(id[0])
+                    #print(tags_df[values][counter])
+                    
+                    print(tags_df.loc[values,])
+                    print("sdfsfd")
+                    fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df[values][column])
+                    counter += 1
             if output_information == 0:
                 print("Checkpoint 6.1")
             tests  = ntpath.basename(filename)
@@ -177,11 +210,11 @@ if check == 0:
         except Exception as e:
             print(repr(e))
             now = datetime.datetime.now()
-            new_name = now.strftime("%Y_%m_%d %H_%M_%S") + " " + ntpath.basename(filename) 
-            shutil.move(filename, errorverzeichnis+ new_name)
-            file = open("errors.txt" ,"w")
-            file.write("Error in" + filename + "\n")
-            file.close()
+            shutil.move(filename, errorverzeichnis+ ntpath.basename(filename))
+            error_file_name = ntpath.basename(filename) + "_" + "error.txt"
+            with open(errorverzeichnis+error_file_name ,"w") as f:
+             f.write("Error in" + filename + "\n" +str(e) + "\n" +str(now.strftime("%Y_%m_%d %H_%M_%S")))
+             f.close()
             pass
             
 
