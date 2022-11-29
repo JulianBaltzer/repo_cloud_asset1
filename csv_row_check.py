@@ -62,6 +62,7 @@ def get_set_tags(tags_data):
     print("checkpoint neu 3_1")
     return list(row)   
 
+
 def fill_tag_to_asset(q_id, tag_id, tag_value):
     print("Checkpoint Charlie")
     query1  = "Select max(t_ID) from t_to_q"
@@ -142,8 +143,23 @@ if check == 0:
 
             print("Checkpoint 4.1")
             print(tags_df)
-            print(tags_df.iloc[[0][0]])
             print("Checkpoint 4.2")
+            print(tags_df.iloc[[0][0]])
+            print("Checkpoint 4.3")
+
+            vals = []
+            counter = 0
+            for i in tags_df.iloc:
+                    val = tags_df.iloc[counter]["Ansible.Advanced":"xojo"]
+                    vals.append(val)
+                    counter += 1
+            
+            print(vals)
+
+                
+                
+            print("Checkpoint 4.4")
+            
             if dataframe.empty:
                         print("Keine Datensätze zu verarbeiten")
                         break 
