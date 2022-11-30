@@ -58,26 +58,26 @@ def get_set_tags(tags_data):
         cursor.execute("Insert into tags(tag_ID,tag_name) VALUES ({},'{}')".format(max[0],tags_data))
         db.commit()
         
-        return max[0]
+        return max
     print("checkpoint neu 3_1")
     return list(row)   
 
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
-    print("Checkpoint Charlie")
+    #print("Checkpoint Charlie")
     query1  = "Select max(t_ID) from t_to_q"
     mycursor.execute(query1)
     max  = list(cursor.fetchone())
     
     if max[0] == None:
-            print("if not max")
+            #print("if not max")
             max[0] = 0
     max[0] = max[0] + 1
     
-    print(max)
-    print(tag_id)
-    print(tag_value)
-    print(q_id)
+    #print(max)
+    #print(tag_id)
+    #print(tag_value)
+    #print(q_id)
     cursor.execute("Insert into t_to_q(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, '{}', '{}')".format(max[0],tag_id,q_id,tag_value))
     
 
@@ -147,14 +147,14 @@ if check == 0:
             print(tags_df.iloc[[0][0]])
             print("Checkpoint 4.3")
 
-            vals = []
-            counter = 0
-            for i in tags_df.iloc:
-                    val = tags_df.iloc[counter]["Ansible.Advanced":"xojo"]
-                    vals.append(val)
-                    counter += 1
+            #vals = []
+            #counter = 0
+            #for i in tags_df.iloc:
+            #        val = tags_df.iloc[counter]["Ansible.Advanced":"xojo"]
+            #        vals.append(val)
+            #        counter += 1
             
-            print(vals)
+            #print(vals)
 
                 
                 
@@ -202,16 +202,17 @@ if check == 0:
                     
                 except:
                     raise
+            
             for column in tags_df.columns:
                 id = get_set_tags(column)
+                counter = 0
                 for values in range(0,len(list_of_q_ids)):
+                    
+                    #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
                     #print(list_of_q_ids[counter])
                     #print(id[0])
-                    #print(tags_df[values][counter])
                     
-                    print(tags_df.loc[values,])
-                    print("sdfsfd")
-                    fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df[values][column])
+                    fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
                     counter += 1
             if output_information == 0:
                 print("Checkpoint 6.1")
