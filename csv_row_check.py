@@ -27,39 +27,39 @@ def get_set_tags(tags_data):
     
 
     tags_data = str(tags_data)
-    print("Checkpoint neu1")
+    #print("Checkpoint neu1")
     query2 = "Select tag_ID from tags where tag_name = (%s)"
 
     
     mycursor.execute(query2, (tags_data,), False)
-    print("Checkpoint neu2")
+    #print("Checkpoint neu2")
     row = cursor.fetchone()
-    print("Checkpoint neu3")
-    print(row)
+    #print("Checkpoint neu3")
+    #print(row)
   
-    print(type(row))
+    #print(type(row))
     
     
     if not row:
-        print("dgdfgdfgjiodfg")
+        #print("dgdfgdfgjiodfg")
         query1  = "Select max(tag_ID) from tags"
         mycursor.execute(query1)
         max  = list(cursor.fetchone())
-        print(max[0])
+        #print(max[0])
         if max[0] == None:
-            print("if not max")
+           # print("if not max")
             max[0] = 0
         max[0] = max[0] + 1
 
-        print("checkpoint neu2_1")
-        print(max)
-        print(tags_data)
+       # print("checkpoint neu2_1")
+        #print(max)
+        #print(tags_data)
         #query = "Insert into tags(tag_ID,tag_name) VALUES (%i,%s)"
         cursor.execute("Insert into tags(tag_ID,tag_name) VALUES ({},'{}')".format(max[0],tags_data))
         db.commit()
         
         return max
-    print("checkpoint neu 3_1")
+    #print("checkpoint neu 3_1")
     return list(row)   
 
 
@@ -84,7 +84,7 @@ def fill_tag_to_asset(q_id, tag_id, tag_value):
     
 cursor  = db.cursor()
 check = 0
-output_information = 0 
+output_information = 1 
 
 
 
@@ -156,7 +156,7 @@ if check == 0:
             
             #print(vals)
 
-                
+            print(dataframe)
                 
             print("Checkpoint 4.4")
             
@@ -170,9 +170,9 @@ if check == 0:
             if output_information == 0:
                 print("Checkpoint 5")
             list_of_q_ids = []
+            counter = 0
             for index, rows in dataframe.iterrows():
-                #if output_information == 0:
-                    #print("Checkpoint 6")
+                
                 try: 
                     q_id = str(uuid4())
                     query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
@@ -198,22 +198,27 @@ if check == 0:
                                         rows["cost/skuUnitDescription"]))
                     db.commit()
                     
-                    list_of_q_ids.append(str(q_id))
+                    for column in tags_df.columns:
+                        if counter == 0:
+                            id = get_set_tags(column)
                     
+                        # counter = 0
+                        # for values in range(0,len(list_of_q_ids)):
+                        
+                        #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
+                        #print(list_of_q_ids[counter])
+                        #print(id[0])
+                        if len(tags_df.loc[0,column]) > 3:
+                            fill_tag_to_asset(q_id,id[0],tags_df.loc[0,column])  
+                        #fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
+                        #counter += 1
+                        #list_of_q_ids.append(str(q_id)) 
+                    counter = 1       
                 except:
                     raise
             
-            for column in tags_df.columns:
-                id = get_set_tags(column)
-                counter = 0
-                for values in range(0,len(list_of_q_ids)):
+            
                     
-                    #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
-                    #print(list_of_q_ids[counter])
-                    #print(id[0])
-                    
-                    fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
-                    counter += 1
             if output_information == 0:
                 print("Checkpoint 6.1")
             tests  = ntpath.basename(filename)
