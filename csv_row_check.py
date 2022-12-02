@@ -1,4 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 09.09.2022
+# Version 0.0.1.0 
 from ast import In, Pass
 import shutil
 import os
@@ -47,11 +48,11 @@ def get_set_tags(tags_data):
         max  = list(cursor.fetchone())
         #print(max[0])
         if max[0] == None:
-           # print("if not max")
+            #print("if not max")
             max[0] = 0
         max[0] = max[0] + 1
 
-       # print("checkpoint neu2_1")
+        #print("checkpoint neu2_1")
         #print(max)
         #print(tags_data)
         #query = "Insert into tags(tag_ID,tag_name) VALUES (%i,%s)"
@@ -60,7 +61,7 @@ def get_set_tags(tags_data):
         
         return max
     #print("checkpoint neu 3_1")
-    return list(row)   
+    return list(row)
 
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
@@ -74,29 +75,19 @@ def fill_tag_to_asset(q_id, tag_id, tag_value):
             max[0] = 0
     max[0] = max[0] + 1
     
-    #print(max)
-    #print(tag_id)
-    #print(tag_value)
-    #print(q_id)
     cursor.execute("Insert into t_to_q(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, '{}', '{}')".format(max[0],tag_id,q_id,tag_value))
-    
-
     
 cursor  = db.cursor()
 check = 0
 output_information = 1 
-
-
 
 source = "/home/opc/Project/Source/"
 destination = "/home/opc/Project/arbeitsverzeichnis/"
 errorverzeichnis = "/home/opc/Project/error/"
 done = "/home/opc/Project/Output/"
 
-
 if output_information == 0:
     print("Checkpoint 1")
-
 
 if len(os.listdir('/home/opc/Project/Source') ) == 0:
     print("Keine Datei vorhanden")
@@ -112,7 +103,6 @@ if check == 0:
     if output_information == 0:
         print("Checkpoint 2")    
         
-   
     path  = "/home/opc/Project/arbeitsverzeichnis"
     filenames  = glob.glob(path + "/*.csv.gz")
     
@@ -123,6 +113,8 @@ if check == 0:
     for filename in filenames:
         try:
             counter = 0
+            counter1 = 0
+            start = datetime.datetime.now()
             if output_information == 0:
                 print("Checkpoint 4")
             dataframe = pd.read_csv(filename, sep=',',low_memory=False,compression='gzip')
@@ -138,7 +130,6 @@ if check == 0:
             dataframe.drop(['lineItem/referenceNo','lineItem/tenantId', 'product/compartmentId', 'product/region', 'product/availabilityDomain',
                             'usage/billedQuantityOverage', 'cost/subscriptionId', 'cost/unitPriceOverage', 'cost/myCostOverage',
                             'cost/overageFlag', 'lineItem/isCorrection', 'lineItem/backreferenceNo'], axis='columns', inplace=True)
-            
             tags_df = dataframe.filter(regex=r'^tag')
 
             print("Checkpoint 4.1")
@@ -146,18 +137,7 @@ if check == 0:
             print("Checkpoint 4.2")
             print(tags_df.iloc[[0][0]])
             print("Checkpoint 4.3")
-
-            #vals = []
-            #counter = 0
-            #for i in tags_df.iloc:
-            #        val = tags_df.iloc[counter]["Ansible.Advanced":"xojo"]
-            #        vals.append(val)
-            #        counter += 1
-            
-            #print(vals)
-
-            print(dataframe)
-                
+            print(dataframe)     
             print("Checkpoint 4.4")
             
             if dataframe.empty:
@@ -201,24 +181,25 @@ if check == 0:
                     for column in tags_df.columns:
                         if counter == 0:
                             id = get_set_tags(column)
-                    
+                        #Startzeit: 2022-12-01 08:42:01.652618 Endzeit: 2022-12-01 08:45:34.893419
+                        #Mit Filter
+                        #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789
+                        #Ohne Filter
                         # counter = 0
                         # for values in range(0,len(list_of_q_ids)):
-                        
                         #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
-                        #print(list_of_q_ids[counter])
-                        #print(id[0])
-                        if len(tags_df.loc[0,column]) > 3:
-                            fill_tag_to_asset(q_id,id[0],tags_df.loc[0,column])  
+                        
+                        """Funktioniert nicht richtig. ID bleibt bei 22"""
+                        if len(str(tags_df.loc[counter,column])) > 3:
+                            fill_tag_to_asset(q_id,id[0],tags_df.loc[counter,column])
+                              
                         #fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
                         #counter += 1
                         #list_of_q_ids.append(str(q_id)) 
-                    counter = 1       
+                    counter += 1       
                 except:
                     raise
-            
-            
-                    
+   
             if output_information == 0:
                 print("Checkpoint 6.1")
             tests  = ntpath.basename(filename)
@@ -229,6 +210,8 @@ if check == 0:
             if output_information == 0:
                 print("Checkpoint 7")
             db.commit()
+            end = datetime.datetime.now()
+            print("Startzeit:" + str(start) + "Endzeit: " + str(end))
         except Exception as e:
             print(repr(e))
             now = datetime.datetime.now()
