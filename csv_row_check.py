@@ -1,5 +1,5 @@
-# Project: Cloud_Assets, Author: Julian Baltzer, Datum: 09.09.2022
-# Version 0.0.1.0 
+# Project: Cloud_Assets, Author: Julian Baltzer, Datum: 02.12.2022
+# Version: 0.2.1.1 major_update/minor_update/patch/hotfix
 from ast import In, Pass
 import shutil
 import os
@@ -206,16 +206,16 @@ if check == 0:
             if output_information == 0:
                 print("Checkpoint 6.2")
             now = datetime.datetime.now()
-            shutil.move(filename, done + now.strftime("%Y_%m_%d %H_%M_%S") + tests)  
+            shutil.move(filename,done+now.strftime("%Y_%m_%d %H_%M_%S")+tests)  
             if output_information == 0:
                 print("Checkpoint 7")
             db.commit()
             end = datetime.datetime.now()
-            print("Startzeit:" + str(start) + "Endzeit: " + str(end))
+            print("Startzeit:"+str(start)+"Endzeit: "+str(end))
         except Exception as e:
             print(repr(e))
             now = datetime.datetime.now()
-            shutil.move(filename, errorverzeichnis+ ntpath.basename(filename))
+            shutil.move(filename,errorverzeichnis+now.strftime("%Y_%m_%d %H_%M_%S")+ntpath.basename(filename))
             error_file_name = ntpath.basename(filename) + "_" + "error.txt"
             with open(errorverzeichnis+error_file_name ,"w") as f:
              f.write("Error in" + filename + "\n" +str(e) + "\n" +str(now.strftime("%Y_%m_%d %H_%M_%S")))

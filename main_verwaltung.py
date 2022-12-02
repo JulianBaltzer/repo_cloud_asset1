@@ -19,19 +19,19 @@ cursor = db.cursor()
 cursor2 = db2.cursor()
 
 def check_servicetype(servicetype):
-    print(servicetype)
+   # print(servicetype)
     cursor.execute("Select st_id from servicestypes where st_type = '{}'".format(servicetype))
     id = cursor.fetchone()
-    print(id)
+   # print(id)
     if not id:
         query  = "Select max(st_id) from servicestypes"
         cursor.execute(query)
         max  = list(cursor.fetchone())
         if max[0] == None:
-            print("if not max")
+           # print("if not max")
             max[0] = 0
         max[0] = max[0] + 1
-        print("test")
+       # print("test")
         cursor.execute("Insert INTO servicestypes (st_id,st_type) VALUES ('{}','{}');".format(max[0],servicetype))
         db.commit()
         return max
@@ -39,7 +39,7 @@ def check_servicetype(servicetype):
     return id 
 
 def check_services(service, product_sku, currency, billingunit_long, billingunit, service_id):
-    print(service_id)
+    #print(service_id)
     cursor.execute("Select s_id from sevices where s_name = '{}' AND s_stid = '{}'".format(service,service_id))
     id = cursor.fetchone()
     if id == None:
@@ -47,7 +47,7 @@ def check_services(service, product_sku, currency, billingunit_long, billingunit
         cursor.execute(query)
         max  = list(cursor.fetchone())
         if max[0] == None:
-            print("if not max")
+            #print("if not max")
             max[0] = 0
         max[0] = max[0] + 1
         cursor.execute("Insert INTO sevices(s_id, s_productsku, s_name, s_currency, s_billingunit_long, s_billingunit, s_stid) VALUES('{}','{}','{}','{}','{}','{}','{}');".format(max[0],product_sku,service,currency,billingunit_long,billingunit,service_id))
@@ -60,12 +60,12 @@ def check_resources(resource, s_id):
     cursor.execute("Select r_id from resources where r_name = '{}' AND r_sid = '{}'".format(resource,s_id))
     id = cursor.fetchone()
     if id == None:
-        print(type(s_id))
+       # print(type(s_id))
         query  = "Select max(r_id) from resources"
         cursor.execute(query)
         max  = list(cursor.fetchone())
         if max[0] == None:
-            print("if not max")
+            #print("if not max")
             max[0] = 0
         max[0] = max[0] + 1
         cursor.execute("Insert INTO resources (r_id, r_name, r_sid) VALUES ('{}', '{}', '{}')".format(max[0],resource,s_id))
@@ -111,16 +111,16 @@ for x in list_of_queue:
     currency_code = x[17]
     billingunit_long = x[18]
     skuUnitDescription = x[19]    
-    print("Checkpoint 1")
+    #print("Checkpoint 1")
     servicetype_id = check_servicetype(service)
-    print("Checkpoint 2")
-    print(servicetype_id)
+    #print("Checkpoint 2")
+   # print(servicetype_id)
     service_id = check_services(service_type, product_sku, currency_code, billingunit_long, skuUnitDescription, servicetype_id[0])
-    print("Checkpoint 3")
+    #print("Checkpoint 3")
     res_id  = check_resources(resource,service_id[0])
-    print("Checkpoint 4")
-    print(res_id)
-    print("über mir")
+    #print("Checkpoint 4")
+    #print(res_id)
+    #print("über mir")
     
     query  = "Select max(c_id) from costs"
     cursor.execute(query)
@@ -130,7 +130,7 @@ for x in list_of_queue:
         max[0] = 0
     max[0] = max[0] + 1
     
-    
+   # print(billedquantity)
     cursor.execute("Insert INTO costs (c_id, c_mycost, c_unitprice, c_billedquantity, startzeit, endzeit, compartment_name, c_rid) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(max[0], mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id[0]))
 
     query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
