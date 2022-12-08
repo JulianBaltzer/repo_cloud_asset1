@@ -1,5 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 08.12.2022
-# Version: 0.2.2.2 major_update/minor_update/patch/hotfix
+# Version: 0.3.0.0 major_update/minor_update/patch/hotfix
 import shutil
 import os
 import pandas as pd
@@ -133,6 +133,7 @@ if check == 0:
                 print("Checkpoint 5")
             list_of_q_ids = []
             counter = 0
+            counter1 = 0
             percent  = dataframe.shape[0]
             percent_counter = 1
             
@@ -166,25 +167,30 @@ if check == 0:
                     db.commit()
                     
                     for column in tags_df.columns:
+                        if counter1 == 0: # Counter1 wird oben deklariert. Wird nur einmal verwendet um den For loop in z.171 zu sperren
+                            for column in tags_df.columns:
+                                id = get_set_tags(column)
+                                list_of_q_ids.append(id[0])
+                        counter1 = 1
                         
-                        id = get_set_tags(column)
-                            
-                        #Startzeit: 2022-12-01 08:42:01.652618 Endzeit: 2022-12-01 08:45:34.893419 ~ 3 minuten
-                        #Mit komplettem Filter
                         #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789 ~ 23 minuten
                         #Ganz ohne Filter
                         #Startzeit: 2022-12-08 13:26:17.392479 Endzeit: 2022-12-08 13:34:45.640646 ~ 8 minuten
+                        #Startzeit: 2022-12-08 14:00:10.387717 Endzeit: 2022-12-08 14:08:38.106631 ~ 8 minuten
                         #Nur Zellen mit Inhalt 
                         
+                        #Startzeit:2022-12-08 14:21:35.614261Endzeit: 2022-12-08 14:25:05.606963 ~ 3 - 4 minuten
+                        #Aktuell 
+
 
                         """ counter = 0
                         # for values in range(0,len(list_of_q_ids)):
                         #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
                         """
-                        
+                        counter_für_list = 0 # Der Counter ist um die list of qids durchzugehen. Muss direkt erhöht werden um den nächsten tag in der Liste auszuwählen
                         if len(str(tags_df.loc[counter,column])) > 3:
-                                fill_tag_to_asset(q_id,id[0],tags_df.loc[counter,column])  
-                        
+                                fill_tag_to_asset(q_id,list_of_q_ids[counter_für_list],tags_df.loc[counter,column])  
+                        counter_für_list += 1
                         """      
                         #fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
                         #counter += 1
