@@ -1,5 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 08.12.2022
-# Version: 0.2.2.1 major_update/minor_update/patch/hotfix
+# Version: 0.2.2.2 major_update/minor_update/patch/hotfix
 import shutil
 import os
 import pandas as pd
@@ -169,10 +169,14 @@ if check == 0:
                         
                         id = get_set_tags(column)
                             
-                        #Startzeit: 2022-12-01 08:42:01.652618 Endzeit: 2022-12-01 08:45:34.893419
-                        #Mit Filter
-                        #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789
-                        #Ohne Filter
+                        #Startzeit: 2022-12-01 08:42:01.652618 Endzeit: 2022-12-01 08:45:34.893419 ~ 3 minuten
+                        #Mit komplettem Filter
+                        #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789 ~ 23 minuten
+                        #Ganz ohne Filter
+                        #Startzeit: 2022-12-08 13:26:17.392479 Endzeit: 2022-12-08 13:34:45.640646 ~ 8 minuten
+                        #Nur Zellen mit Inhalt 
+                        
+
                         """ counter = 0
                         # for values in range(0,len(list_of_q_ids)):
                         #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
