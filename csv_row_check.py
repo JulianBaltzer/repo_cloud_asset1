@@ -1,20 +1,18 @@
-# Project: Cloud_Assets, Author: Julian Baltzer, Datum: 02.12.2022
+# Project: Cloud_Assets, Author: Julian Baltzer, Datum: 08.12.2022
 # Version: 0.2.2.1 major_update/minor_update/patch/hotfix
-from ast import In, Pass
 import shutil
 import os
 import pandas as pd
 import glob
 import datetime
 import mysql.connector
-import sys
 import ntpath
 import time
 
 from sqlalchemy import create_engine
 from uuid import uuid4
 
-
+"""Connection zur Datenbank herstellen. Hier sollte sich noch eine andere Methode zur speicherung des Passwortes überlegt werden"""
 db = mysql.connector.connect(
     host='localhost',
     database='Queue',
@@ -22,26 +20,29 @@ db = mysql.connector.connect(
     password='Gu6dQVQbMXFsPQQ7!',
     port=3306
 )
-
 mycursor = db.cursor()
 
-def get_set_tags(tags_data):
 
+def get_set_tags(tags_data):
+    
+    # Funktion um die Tag Tabelle mit den Tagbezeichnungen zu füllen. 
+    # IDs werden hier ebenfalls generiert. 
+    
     tags_data = str(tags_data)
     query2 = "Select tag_ID from tags where tag_name = (%s)"
     mycursor.execute(query2, (tags_data,), False)
     
-    row = cursor.fetchone()
+    row = cursor.fetchone() # Für die überprüfung ob row = null muss nicht in list convertiert werden!
     if not row:
         query1  = "Select max(tag_ID) from tags"
         mycursor.execute(query1)
-        print("1")
-        max  = list(cursor.fetchone())  # Return aus cursor.fetchone() ist tuple. Wertzuweisung ist bei tuple nicht möglich deswegen list()
-        print("2")
+
+        max  = list(cursor.fetchone())  # Return aus cursor.fetchone() ist immer tuple. Wertzuweisung ist bei tuple nicht möglich deswegen list()
+
         if max[0] == None:
             max[0] = 0
         max[0] = max[0] + 1
-        print("3")
+
         cursor.execute("Insert into tags(tag_ID,tag_name) VALUES ({},'{}')".format(max[0],tags_data))
         db.commit()
         return max
