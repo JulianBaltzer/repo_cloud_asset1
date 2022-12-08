@@ -1,5 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 02.12.2022
-# Version: 0.2.2.0 major_update/minor_update/patch/hotfix
+# Version: 0.2.2.1 major_update/minor_update/patch/hotfix
 from ast import In, Pass
 import shutil
 import os
@@ -165,26 +165,26 @@ if check == 0:
                     db.commit()
                     
                     for column in tags_df.columns:
-                        #if counter == 0:
-                            #print("0.1")
+                        
                         id = get_set_tags(column)
                             
                         #Startzeit: 2022-12-01 08:42:01.652618 Endzeit: 2022-12-01 08:45:34.893419
                         #Mit Filter
                         #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789
                         #Ohne Filter
-                        # counter = 0
+                        """ counter = 0
                         # for values in range(0,len(list_of_q_ids)):
                         #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
+                        """
                         
-                        """Funktioniert nicht richtig. ID bleibt bei 22"""
                         if len(str(tags_df.loc[counter,column])) > 3:
                                 fill_tag_to_asset(q_id,id[0],tags_df.loc[counter,column])  
                         
-                              
+                        """      
                         #fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
                         #counter += 1
-                        #list_of_q_ids.append(str(q_id)) 
+                        #list_of_q_ids.append(str(q_id))
+                        """ 
                     counter += 1
                     
                              
