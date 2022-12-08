@@ -1,5 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 02.12.2022
-# Version: 0.2.1.1 major_update/minor_update/patch/hotfix
+# Version: 0.2.2.0 major_update/minor_update/patch/hotfix
 from ast import In, Pass
 import shutil
 import os
@@ -10,9 +10,10 @@ import mysql.connector
 import sys
 import ntpath
 import time
+
 from sqlalchemy import create_engine
 from uuid import uuid4
-import random
+
 
 db = mysql.connector.connect(
     host='localhost',
@@ -25,56 +26,36 @@ db = mysql.connector.connect(
 mycursor = db.cursor()
 
 def get_set_tags(tags_data):
-    
 
     tags_data = str(tags_data)
-    #print("Checkpoint neu1")
     query2 = "Select tag_ID from tags where tag_name = (%s)"
-
-    
     mycursor.execute(query2, (tags_data,), False)
-    #print("Checkpoint neu2")
+    
     row = cursor.fetchone()
-    #print("Checkpoint neu3")
-    #print(row)
-  
-    #print(type(row))
-    
-    
     if not row:
-        #print("dgdfgdfgjiodfg")
         query1  = "Select max(tag_ID) from tags"
         mycursor.execute(query1)
-        max  = list(cursor.fetchone())
-        #print(max[0])
+        print("1")
+        max  = list(cursor.fetchone())  # Return aus cursor.fetchone() ist tuple. Wertzuweisung ist bei tuple nicht möglich deswegen list()
+        print("2")
         if max[0] == None:
-            #print("if not max")
             max[0] = 0
         max[0] = max[0] + 1
-
-        #print("checkpoint neu2_1")
-        #print(max)
-        #print(tags_data)
-        #query = "Insert into tags(tag_ID,tag_name) VALUES (%i,%s)"
+        print("3")
         cursor.execute("Insert into tags(tag_ID,tag_name) VALUES ({},'{}')".format(max[0],tags_data))
         db.commit()
-        
         return max
-    #print("checkpoint neu 3_1")
-    return list(row)
+    return list(row) # Hier wird row zur list gemacht, da der aktuelle type tuple ist und dieser nicht änderbar ist. Wäre ich in z.38 möglich
 
 
 def fill_tag_to_asset(q_id, tag_id, tag_value):
-    #print("Checkpoint Charlie")
     query1  = "Select max(t_ID) from t_to_q"
     mycursor.execute(query1)
     max  = list(cursor.fetchone())
     
     if max[0] == None:
-            #print("if not max")
             max[0] = 0
     max[0] = max[0] + 1
-    
     cursor.execute("Insert into t_to_q(t_ID,tag_ID,q_id,tag_value) VALUES ({}, {}, '{}', '{}')".format(max[0],tag_id,q_id,tag_value))
     
 cursor  = db.cursor()
@@ -151,9 +132,14 @@ if check == 0:
                 print("Checkpoint 5")
             list_of_q_ids = []
             counter = 0
+            percent  = dataframe.shape[0]
+            percent_counter = 1
+            
             for index, rows in dataframe.iterrows():
-                
+                print(str(percent_counter) + "/" + str(percent))
+                percent_counter += 1
                 try: 
+                    
                     q_id = str(uuid4())
                     query = "INSERT IGNORE INTO queue VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
                     cursor.execute(query,(q_id,
@@ -179,8 +165,10 @@ if check == 0:
                     db.commit()
                     
                     for column in tags_df.columns:
-                        if counter == 0:
-                            id = get_set_tags(column)
+                        #if counter == 0:
+                            #print("0.1")
+                        id = get_set_tags(column)
+                            
                         #Startzeit: 2022-12-01 08:42:01.652618 Endzeit: 2022-12-01 08:45:34.893419
                         #Mit Filter
                         #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789
@@ -191,12 +179,15 @@ if check == 0:
                         
                         """Funktioniert nicht richtig. ID bleibt bei 22"""
                         if len(str(tags_df.loc[counter,column])) > 3:
-                            fill_tag_to_asset(q_id,id[0],tags_df.loc[counter,column])
+                                fill_tag_to_asset(q_id,id[0],tags_df.loc[counter,column])  
+                        
                               
                         #fill_tag_to_asset(list_of_q_ids[counter],id[0],tags_df.loc[values,column])
                         #counter += 1
                         #list_of_q_ids.append(str(q_id)) 
-                    counter += 1       
+                    counter += 1
+                    
+                             
                 except:
                     raise
    
