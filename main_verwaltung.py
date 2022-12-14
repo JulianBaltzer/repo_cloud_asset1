@@ -1,5 +1,5 @@
-# Project: Cloud_Assets, Author: Julian Baltzer, Michael Malkmus Datum: 08.12.2022
-# Version: 0.2.2.0 major_update/minor_update/patch/hotfix
+# Project: Cloud_Assets, Author: Julian Baltzer, Michael Malkmus Datum: 14.12.2022
+# Version: 0.2.2.1 major_update/minor_update/patch/hotfix
 import mysql.connector
 
 db = mysql.connector.connect(
@@ -137,7 +137,8 @@ for x in list_of_queue:
    # print(billedquantity)
     cursor.execute("Insert INTO costs (c_id, c_mycost, c_unitprice, c_billedquantity, startzeit, endzeit, compartment_name, c_rid) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(max[0], mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id[0]))
     counter = counter + 1
-    query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
-    cursor2.execute(query)
+    
+query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
+cursor2.execute(query)
     
 db2.commit()
