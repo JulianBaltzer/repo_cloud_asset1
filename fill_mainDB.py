@@ -137,7 +137,7 @@ for x in list_of_queue:
    # print(billedquantity)
     cursor.execute("Insert INTO costs (c_id, c_mycost, c_unitprice, c_billedquantity, startzeit, endzeit, compartment_name, c_rid) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(max[0], mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id[0]))
     counter = counter + 1
-    
+    #test
 query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
 cursor2.execute(query)
     
