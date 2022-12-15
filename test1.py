@@ -1,10 +1,17 @@
-from uuid import uuid4
-import random
+import mysql.connector
 
+db2 = mysql.connector.connect(
+    host='localhost',
+    database='Queue',
+    user='root',
+    password='Gu6dQVQbMXFsPQQ7!',
+    port=3306
+)
 
+cursor = db2.cursor()
 
-test1 = random.getrandbits(32)
-test = uuid4()
+cursor.execute("delete from t_to_q")
+cursor.execute("delete from tags")
+cursor.execute("delete from queue")
 
-print(str(test))
-print(test1)
+db2.commit()

@@ -78,30 +78,60 @@ def check_resources(resource, s_id):
         return max
     return id
 
-'''def check_tags(tags):
-    cursor.execute("Select * from tags where t_name = {}".format(tags)) 
-    row = cursor.fetchall()
-    if row == None:
-        cursor.execute("Insert into tags (t_name) VALUES ({})".format(tags))
-    cursor.execute("Select t_id from tags where t_name = {}".format(tags))
-    id = cursor.fetchall()
-    return id   
+def fill_tag_to_cost(q_id, c_id):
+    print(q_id)
+    query  = "Select tag_ID, tag_value from t_to_q where q_id = '{}'".format(q_id)
+    cursor2.execute(query)
+    result  = list(cursor2.fetchall())
+    print(result)
+    #print(max)
+    
+    query = "Select max(tags2c_id) from tags_has_costs"
+    cursor.execute(query)
+    max  = list(cursor.fetchone())
+    if max[0] == None:
+            max[0] = 1
+    for x in result:
+        max[0] = max[0] + 1
+        cursor.execute("Insert into tags_has_costs(tags2c_id,tags2c_tid,tags2c_cid,t2c_tagvalue) VALUES ('{}', '{}', '{}', '{}')".format(max[0],x[0],c_id,x[1]))
+        
+def get_set_tags(tags_data):
+      
+    tags_data = str(tags_data)
+    query2 = "Select t_id from tags where t_name = (%s)"
+    cursor.execute(query2, (tags_data,), False)
+    
+    row = cursor.fetchone() # Für die überprüfung ob row = null muss nicht in list convertiert werden!
+    if not row:
+        query1  = "Select max(t_id) from tags"
+        cursor.execute(query1)
 
-def fill_tag_to_cost(r_id, tag_id, tag_value):
-    cursor.execute("Select c_id from costs where c_rid = {}".format(r_id))
-    c_id = cursor.fetchall()
-    cursor.execute("Insert into tags_has_cost(tags2c_tid,tags2c_cid,t2c_tagvalue) VALUES ({}, {}, {})".format(tag_id,c_id,tag_value))'''
-    
-    
+        max  = list(cursor.fetchone())  # Return aus cursor.fetchone() ist immer tuple. Wertzuweisung ist bei tuple nicht möglich deswegen list()
+
+        if max[0] == None:
+            max[0] = 0
+        max[0] = max[0] + 1
+
+        cursor.execute("Insert into tags(t_id,t_name) VALUES ('{}','{}')".format(max[0],tags_data))
+        db.commit()
+        
+
 cursor2.execute("Select * from queue where queue_status_qs_id = 0 LIMIT 5000")
 list_of_queue = list(cursor2.fetchall())
 
 cursor2.execute("Select * from queue_status")
 list_of_status = list(cursor2.fetchall())
 
+cursor2.execute("Select * from tags")
+tags = list(cursor2.fetchall())
+
+for x in tags:
+    get_set_tags(x[1])
 
 for x in list_of_queue:
     print(counter)
+    q_id = x[0]
+    print(q_id)
     startzeit = x[7]
     endzeit = x[8]
     service = x[9]
@@ -136,6 +166,7 @@ for x in list_of_queue:
     
    # print(billedquantity)
     cursor.execute("Insert INTO costs (c_id, c_mycost, c_unitprice, c_billedquantity, startzeit, endzeit, compartment_name, c_rid) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(max[0], mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id[0]))
+    fill_tag_to_cost(q_id, max[0])
     counter = counter + 1
     #test
 query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
