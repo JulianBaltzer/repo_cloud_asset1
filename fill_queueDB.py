@@ -11,7 +11,7 @@ import time
 
 from sqlalchemy import create_engine
 from uuid import uuid4
-
+#g
 """Connection zur Datenbank herstellen. Hier sollte sich noch eine andere Methode zur speicherung des Passwortes überlegt werden"""
 db = mysql.connector.connect(
     host='localhost',
