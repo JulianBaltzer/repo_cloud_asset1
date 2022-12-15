@@ -1,5 +1,5 @@
 # Project: Cloud_Assets, Author: Julian Baltzer, Datum: 08.12.2022
-# Version: 0.3.0.0 major_update/minor_update/patch/hotfix
+# Version: 0.3.0.1 major_update/minor_update/patch/hotfix
 import shutil
 import os
 import pandas as pd
@@ -140,6 +140,7 @@ if check == 0:
             for index, rows in dataframe.iterrows():
                 print(str(percent_counter) + "/" + str(percent))
                 percent_counter += 1
+                counter_für_list = 0
                 try: 
                     
                     q_id = str(uuid4())
@@ -173,6 +174,8 @@ if check == 0:
                                 list_of_q_ids.append(id[0])
                         counter1 = 1
                         
+                        #print(list_of_q_ids)
+                        #print(counter_für_list)
                         #Startzeit: 2022-12-01 08:47:41.714866 Endzeit: 2022-12-01 09:06:53.929789 ~ 23 minuten
                         #Ganz ohne Filter
                         #Startzeit: 2022-12-08 13:26:17.392479 Endzeit: 2022-12-08 13:34:45.640646 ~ 8 minuten
@@ -187,7 +190,7 @@ if check == 0:
                         # for values in range(0,len(list_of_q_ids)):
                         #print(str(values) +  str(column) + str(tags_df.loc[values,column]))
                         """
-                        counter_für_list = 0 # Der Counter ist um die list of qids durchzugehen. Muss direkt erhöht werden um den nächsten tag in der Liste auszuwählen
+                        #counter_für_list = 0 # Der Counter ist um die list of qids durchzugehen. Muss direkt erhöht werden um den nächsten tag in der Liste auszuwählen
                         if len(str(tags_df.loc[counter,column])) > 3:
                                 fill_tag_to_asset(q_id,list_of_q_ids[counter_für_list],tags_df.loc[counter,column])  
                         counter_für_list += 1
