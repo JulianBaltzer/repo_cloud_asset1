@@ -1,3 +1,5 @@
+# Project: Cloud_Assets, Author: Julian Baltzer, Michael Malkmus Datum: 14.12.2022
+# Version: 0.2.2.1 major_update/minor_update/patch/hotfix
 import mysql.connector
 
 db = mysql.connector.connect(
@@ -56,8 +58,10 @@ def check_services(service, product_sku, currency, billingunit_long, billingunit
         return max
     return id 
 
+counter = 0
+
 def check_resources(resource, s_id): 
-    cursor.execute("Select r_id from resources where r_name = '{}' AND r_sid = '{}'".format(resource,s_id))
+    cursor.execute("Select r_id from resources where r_name = '{}'".format(resource,s_id))
     id = cursor.fetchone()
     if id == None:
        # print(type(s_id))
@@ -97,7 +101,7 @@ list_of_status = list(cursor2.fetchall())
 
 
 for x in list_of_queue:
-
+    print(counter)
     startzeit = x[7]
     endzeit = x[8]
     service = x[9]
@@ -132,8 +136,9 @@ for x in list_of_queue:
     
    # print(billedquantity)
     cursor.execute("Insert INTO costs (c_id, c_mycost, c_unitprice, c_billedquantity, startzeit, endzeit, compartment_name, c_rid) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(max[0], mycost, unit_price, billedquantity, startzeit, endzeit, compartment, res_id[0]))
-
-    query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
-    cursor2.execute(query)
+    counter = counter + 1
+    
+query = "UPDATE queue SET queue_status_qs_id = 1 WHERE queue_status_qs_id = 0 LIMIT 5000"
+cursor2.execute(query)
     
 db2.commit()
