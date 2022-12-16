@@ -10,11 +10,13 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
+cursor.execute("DELETE FROM tags_has_costs")
+cursor.execute("DELETE FROM tags")
 cursor.execute("DELETE FROM costs")
 cursor.execute("DELETE FROM resources")
 cursor.execute("DELETE FROM sevices")
 cursor.execute("DELETE FROM servicestypes")
-cursor.execute("DELETE FROM tags_has_costs")
-cursor.execute("DELETE FROM tags")
+
+
 
 db.commit()
