@@ -90,7 +90,7 @@ def fill_tag_to_cost(q_id, c_id):
     cursor.execute(query)
     max  = list(cursor.fetchone())
     if max[0] == None:
-            max[0] = 1
+            max[0] = 0
     for x in result:
         max[0] = max[0] + 1
         cursor.execute("Insert into tags_has_costs(tags2c_id,tags2c_tid,tags2c_cid,t2c_tagvalue) VALUES ('{}', '{}', '{}', '{}')".format(max[0],x[0],c_id,x[1]))
@@ -116,7 +116,7 @@ def get_set_tags(tags_data):
         db.commit()
         
 
-cursor2.execute("Select * from queue where queue_status_qs_id = 0 LIMIT 5000")
+cursor2.execute("Select * from queue where queue_status_qs_id = 0 LIMIT 5001")
 list_of_queue = list(cursor2.fetchall())
 
 cursor2.execute("Select * from queue_status")
@@ -128,6 +128,7 @@ tags = list(cursor2.fetchall())
 for x in tags:
     get_set_tags(x[1])
 
+print(len(list_of_queue))
 for x in list_of_queue:
     print(counter)
     q_id = x[0]

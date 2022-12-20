@@ -91,7 +91,7 @@ if check == 0:
     if output_information == 0:
         print("Checkpoint 3")
         print(filenames)
-        
+      #,compression='gzip'  .gz
     for filename in filenames:
         try:
             counter = 0
